@@ -5,12 +5,17 @@ public class PlayerMoveState : IPlayerState {
     private float moveSpeed;
     private float runSpeed;
     private Vector3 movement;
-    private bool isRun = false;
+    private bool isRun;
     private Animator animator;
     private float animX;
     private float animZ; 
-    float acceleration = 3f;
-    float deceleration = 6f;
+    private float animXVelocity;
+    private float animZVelocity;
+    private int XmoveAnim;
+    private int ZmoveAnim;
+    private float targetAnimX;
+    private float targetAnimZ;
+    
     
     public void Enter(PlayerController player) {
         Debug.Log("이동");
@@ -18,6 +23,8 @@ public class PlayerMoveState : IPlayerState {
         this.player = player;
         moveSpeed = player.moveSpeed;
         runSpeed = player.runSpeed;
+        XmoveAnim = Animator.StringToHash("XMove");
+        ZmoveAnim = Animator.StringToHash("ZMove");
         
     }
 
@@ -25,10 +32,13 @@ public class PlayerMoveState : IPlayerState {
     {
         isRun = Input.GetKey(KeyCode.LeftShift);
         
-        if (Input.GetKeyDown(KeyCode.Space)) player.ChangeState(new PlayerJumpState());
+        if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded()) player.ChangeState(new PlayerJumpState());
         
-        if( Input.GetAxis("Horizontal") == 0 && Input.GetAxis("Vertical") == 0 ) 
+        if( player.rb.linearVelocity == Vector3.zero )
+        {
+            
             player.ChangeState(new PlayerIdleState());
+        }
         
     }
 
@@ -46,29 +56,26 @@ public class PlayerMoveState : IPlayerState {
         
         float targetSpeed = isRun ? 1f : 0.5f;
 
-        animX = Mathf.MoveTowards(animX, x * targetSpeed, ((Mathf.Abs(x) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
-        animZ = Mathf.MoveTowards(animZ, z * targetSpeed, ((Mathf.Abs(z) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
+        targetAnimX = x == 0 ? 0 : x * targetSpeed;
+        targetAnimZ = z == 0 ? 0 : z * targetSpeed;
         
-        float moveX = Mathf.MoveTowards(animX, x , ((Mathf.Abs(x) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
-        float moveZ = Mathf.MoveTowards(animZ, z , ((Mathf.Abs(z) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
+        float smoothTime = (Mathf.Abs(x) > 0.01f || Mathf.Abs(z) > 0.01f) ? 0.05f : 0.01f; // 움직일 땐 느리게, 멈출 땐 빠르게
+
+        animX = Mathf.SmoothDamp(animX, targetAnimX, ref animXVelocity, smoothTime);
+        animZ = Mathf.SmoothDamp(animZ, targetAnimZ, ref animZVelocity, smoothTime);
         
-        
-        
-        Vector3 inputDirection = new Vector3(moveX, 0, moveZ).normalized;
+        Vector3 inputDirection = new Vector3(x, 0, z).normalized;
         Vector3 moveDirection = player.transform.TransformDirection(inputDirection);
         
-        
-        
-        Debug.Log(moveDirection);
-        Debug.Log(inputDirection);
         movement = isRun 
             ? moveDirection * (moveSpeed * runSpeed * Time.fixedDeltaTime) 
             : moveDirection * (moveSpeed * Time.fixedDeltaTime);
 
-        Debug.Log(movement);
         
-        animator.SetFloat("XMove", animX, 0.1f, Time.deltaTime);
-        animator.SetFloat("ZMove", animZ, 0.1f, Time.deltaTime);
+        
+        animator.SetFloat(XmoveAnim, animX, 0.1f, Time.deltaTime);
+        animator.SetFloat(ZmoveAnim, animZ, 0.1f, Time.deltaTime);
+        
         
         player.Move(movement);
     }

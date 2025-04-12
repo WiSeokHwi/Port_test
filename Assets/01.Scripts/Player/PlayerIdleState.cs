@@ -14,7 +14,7 @@ public class PlayerIdleState : IPlayerState {
         if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) {
             player.ChangeState(new PlayerMoveState());
         }
-        if (Input.GetKeyDown(KeyCode.Space)) {
+        if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded()) {
             player.ChangeState(new PlayerJumpState());
         }
     }

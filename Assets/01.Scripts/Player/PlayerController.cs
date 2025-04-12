@@ -5,15 +5,18 @@ public class PlayerController : MonoBehaviour {
     private IPlayerState _currentState;
     public Animator _animator;
     
-    private Rigidbody rb;
+    public Rigidbody rb;
     public float moveSpeed = 1.3f;
     public float runSpeed = 1.5f;
-
+    public float jumpSpeed = 3.5f;
+    public Vector3 LastMoveDirection { get; private set; }
+    
     void Awake()
     {
         _animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         ChangeState(new PlayerIdleState());
+        
     }
     
     
@@ -38,16 +41,19 @@ public class PlayerController : MonoBehaviour {
     {
          
         rb.MovePosition(rb.position + moveDirection);
+        LastMoveDirection = moveDirection.normalized;
         
     }
 
     public void Jump() {
-        // 점프 물리 처리
+        Vector3 jumpVelocity = LastMoveDirection * 3f + Vector3.up * jumpSpeed;
+        rb.AddForce(jumpVelocity);
     }
 
-    public bool IsGrounded() {
-        // 바닥 체크 로직
-        return true;
+    public bool IsGrounded()
+    {
+        float checkDistance = 0.1f; // 발 밑 거리
+        return Physics.Raycast(transform.position, Vector3.down, checkDistance);
     }
 
     public void SetAnimation(string animName) {
