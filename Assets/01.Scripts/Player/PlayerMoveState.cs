@@ -6,9 +6,15 @@ public class PlayerMoveState : IPlayerState {
     private float runSpeed;
     private Vector3 movement;
     private bool isRun = false;
+    private Animator animator;
+    private float animX;
+    private float animZ; 
+    float acceleration = 3f;
+    float deceleration = 6f;
     
     public void Enter(PlayerController player) {
         Debug.Log("이동");
+        animator =player._animator;
         this.player = player;
         moveSpeed = player.moveSpeed;
         runSpeed = player.runSpeed;
@@ -35,16 +41,34 @@ public class PlayerMoveState : IPlayerState {
 
     public void PhysicsUpdate()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        float x = Input.GetAxis("Horizontal"); // ← Raw 제거!
+        float z = Input.GetAxis("Vertical");
         
-        Vector3 moveDirection = new Vector3(h, 0, v).normalized;
+        float targetSpeed = isRun ? 1f : 0.5f;
+
+        animX = Mathf.MoveTowards(animX, x * targetSpeed, ((Mathf.Abs(x) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
+        animZ = Mathf.MoveTowards(animZ, z * targetSpeed, ((Mathf.Abs(z) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
+        
+        float moveX = Mathf.MoveTowards(animX, x , ((Mathf.Abs(x) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
+        float moveZ = Mathf.MoveTowards(animZ, z , ((Mathf.Abs(z) > 0.01f) ? acceleration : deceleration) * Time.fixedDeltaTime);
+        
+        
+        
+        Vector3 inputDirection = new Vector3(moveX, 0, moveZ).normalized;
+        Vector3 moveDirection = player.transform.TransformDirection(inputDirection);
+        
+        
+        
         Debug.Log(moveDirection);
+        Debug.Log(inputDirection);
         movement = isRun 
-            ? moveDirection * (moveSpeed * runSpeed) 
-            : moveDirection * (moveSpeed);
+            ? moveDirection * (moveSpeed * runSpeed * Time.fixedDeltaTime) 
+            : moveDirection * (moveSpeed * Time.fixedDeltaTime);
 
         Debug.Log(movement);
+        
+        animator.SetFloat("XMove", animX, 0.1f, Time.deltaTime);
+        animator.SetFloat("ZMove", animZ, 0.1f, Time.deltaTime);
         
         player.Move(movement);
     }

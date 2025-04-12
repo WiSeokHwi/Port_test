@@ -3,14 +3,15 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour {
     
     private IPlayerState _currentState;
+    public Animator _animator;
     
     private Rigidbody rb;
-    public float moveSpeed = 3f;
+    public float moveSpeed = 1.3f;
     public float runSpeed = 1.5f;
 
     void Awake()
     {
-        
+        _animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         ChangeState(new PlayerIdleState());
     }
@@ -36,7 +37,8 @@ public class PlayerController : MonoBehaviour {
     public void Move(Vector3 moveDirection)
     {
          
-        rb.MovePosition(moveDirection * (moveSpeed * Time.deltaTime));
+        rb.MovePosition(rb.position + moveDirection);
+        
     }
 
     public void Jump() {

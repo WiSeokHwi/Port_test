@@ -11,7 +11,7 @@ public class PlayerIdleState : IPlayerState {
 
     public void InputHandler()
     {
-        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0) {
+        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) {
             player.ChangeState(new PlayerMoveState());
         }
         if (Input.GetKeyDown(KeyCode.Space)) {

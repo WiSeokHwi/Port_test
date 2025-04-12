@@ -26,5 +26,10 @@ public class FirstVeiwCamara : MonoBehaviour
         
         // 좌우 회전 (플레이어 전체)
         player.Rotate(Vector3.up * mouseX);
+        
+        if (Input.GetKeyDown(KeyCode.F9))
+        {
+            transform.position =new Vector3(player.position.x, transform.position.y , player.position.z - 10f);
+        }
     }
 }
