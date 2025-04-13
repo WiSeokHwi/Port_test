@@ -17,12 +17,12 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.1
   m_TransitionOffset: 0
-  m_ExitTime: 0.87044144
+  m_ExitTime: 1
   m_HasExitTime: 0
   m_HasFixedDuration: 1
-  m_InterruptionSource: 0
+  m_InterruptionSource: 2
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
 --- !u!1107 &-6950093567754982123
@@ -267,7 +267,7 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: Base Layer
     m_StateMachine: {fileID: -6950093567754982123}
-    m_Mask: {fileID: 0}
+    m_Mask: {fileID: 31900000, guid: 6b580184947dad44dbe8fbb276304bb5, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0

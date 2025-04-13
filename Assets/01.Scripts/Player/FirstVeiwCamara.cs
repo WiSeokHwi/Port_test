@@ -3,33 +3,34 @@ using UnityEngine;
 
 public class FirstVeiwCamara : MonoBehaviour
 {
-    public Transform player;
+    public Transform cameraTransform;      // Main Camera
     public float mouseSensitivity = 100f;
 
+
     float xRotation = 0f;
-    private void Awake()
+    float yRotation = 0f;
+
+    void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked; // 마우스 커서 고정
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        // 마우스 입력
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // 상하 회전
+        // 카메라의 좌우 회전
+        yRotation += mouseX;  
+        // 카메라의 상하 회전
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 70f); // 고개 꺾임 제한
+        xRotation = Mathf.Clamp(xRotation, -90f, 70f);  // 상하 회전 제한
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        // 카메라 회전만 처리 (캐릭터는 회전하지 않음)
+        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        transform.rotation = Quaternion.Euler(0f, yRotation, 0f); // 캐릭터는 Y축만 회전
+
         
-        // 좌우 회전 (플레이어 전체)
-        player.Rotate(Vector3.up * mouseX);
-        
-        if (Input.GetKeyDown(KeyCode.F9))
-        {
-            transform.position =new Vector3(player.position.x, transform.position.y , player.position.z - 10f);
-        }
     }
 }

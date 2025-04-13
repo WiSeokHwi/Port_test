@@ -5,6 +5,7 @@ public class PlayerJumpState : IPlayerState {
     private Animator animator;
     
     private static readonly int JumpTrigger = Animator.StringToHash("Jump");
+    
 
     public void Enter(PlayerController player) {
         Debug.Log("점프!");
@@ -12,6 +13,7 @@ public class PlayerJumpState : IPlayerState {
         animator = player._animator;
         // 점프 애니메이션 재생
         animator.SetTrigger(JumpTrigger);
+        player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
     }
 
@@ -27,9 +29,12 @@ public class PlayerJumpState : IPlayerState {
 
     public void PhysicsUpdate()
     {
-
-        player.ChangeState(new PlayerIdleState()); // 땅에 닿으면 Idle로 전환
-    
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.IsName("Jumping") && stateInfo.normalizedTime >= 1f && player.IsGrounded())
+        {
+            player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            player.ChangeState(new PlayerIdleState());
+        }
     }
 
     public void Exit() { }

@@ -4,12 +4,13 @@ public class PlayerController : MonoBehaviour {
     
     private IPlayerState _currentState;
     public Animator _animator;
-    
+    private Vector3 LastMoveDirection;
     public Rigidbody rb;
     public float moveSpeed = 1.3f;
     public float runSpeed = 1.5f;
-    public float jumpSpeed = 3.5f;
-    public Vector3 LastMoveDirection { get; private set; }
+    public float jumpSpeed = 10f;
+    public Transform cameraTransform;
+    
     
     void Awake()
     {
@@ -47,7 +48,8 @@ public class PlayerController : MonoBehaviour {
 
     public void Jump() {
         Vector3 jumpVelocity = LastMoveDirection * 3f + Vector3.up * jumpSpeed;
-        rb.AddForce(jumpVelocity);
+        rb.AddForce(jumpVelocity, ForceMode.Impulse);
+        LastMoveDirection = Vector3.zero;
     }
 
     public bool IsGrounded()

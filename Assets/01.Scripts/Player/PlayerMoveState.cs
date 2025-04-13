@@ -31,8 +31,14 @@ public class PlayerMoveState : IPlayerState {
     public void InputHandler()
     {
         isRun = Input.GetKey(KeyCode.LeftShift);
-        
-        if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded()) player.ChangeState(new PlayerJumpState());
+
+        if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded())
+        {
+            animator.SetFloat(XmoveAnim, 0);
+            animator.SetFloat(ZmoveAnim, 0);
+            
+            player.ChangeState(new PlayerJumpState());
+        }
         
         if( player.rb.linearVelocity == Vector3.zero )
         {
@@ -64,8 +70,17 @@ public class PlayerMoveState : IPlayerState {
         animX = Mathf.SmoothDamp(animX, targetAnimX, ref animXVelocity, smoothTime);
         animZ = Mathf.SmoothDamp(animZ, targetAnimZ, ref animZVelocity, smoothTime);
         
-        Vector3 inputDirection = new Vector3(x, 0, z).normalized;
-        Vector3 moveDirection = player.transform.TransformDirection(inputDirection);
+        Vector3 camForward = player.cameraTransform.forward;
+        Vector3 camRight = player.cameraTransform.right;
+
+// y축을 기준으로만 방향을 잡기 위해 수직 방향 제거
+        camForward.y = 0;
+        camRight.y = 0;
+        camForward.Normalize();
+        camRight.Normalize();
+
+        Vector3 inputDirection = new Vector3(x, 0, z);
+        Vector3 moveDirection = camForward * inputDirection.z + camRight * inputDirection.x;
         
         movement = isRun 
             ? moveDirection * (moveSpeed * runSpeed * Time.fixedDeltaTime) 
