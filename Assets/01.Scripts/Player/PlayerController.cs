@@ -6,10 +6,13 @@ public class PlayerController : MonoBehaviour {
     public Animator _animator;
     private Vector3 LastMoveDirection;
     public Rigidbody rb;
+    public Transform cameraTransform;
+    
+        
     public float moveSpeed = 1.3f;
     public float runSpeed = 1.5f;
     public float jumpSpeed = 10f;
-    public Transform cameraTransform;
+    public bool isAttacking = false;
     
     
     void Awake()

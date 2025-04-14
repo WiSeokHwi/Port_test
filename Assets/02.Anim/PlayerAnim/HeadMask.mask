@@ -6,8 +6,8 @@ AvatarMask:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Player Base Maske
-  m_Mask: 01000000010000000000000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Name: HeadMask
+  m_Mask: 00000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   m_Elements:
   - m_Path: 
     m_Weight: 1
@@ -30,9 +30,9 @@ AvatarMask:
   - m_Path: Rig/B-root/B-hips/B-spine/B-chest/B-neck
     m_Weight: 1
   - m_Path: Rig/B-root/B-hips/B-spine/B-chest/B-neck/B-head
-    m_Weight: 0
+    m_Weight: 1
   - m_Path: Rig/B-root/B-hips/B-spine/B-chest/B-neck/B-head/B-jaw
-    m_Weight: 0
+    m_Weight: 1
   - m_Path: Rig/B-root/B-hips/B-spine/B-chest/B-shoulder.L
     m_Weight: 1
   - m_Path: Rig/B-root/B-hips/B-spine/B-chest/B-shoulder.L/B-upperArm.L

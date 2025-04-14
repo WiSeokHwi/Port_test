@@ -40,10 +40,16 @@ public class PlayerMoveState : IPlayerState {
             player.ChangeState(new PlayerJumpState());
         }
         
-        if( player.rb.linearVelocity == Vector3.zero )
+        if( animX == 0 && animZ == 0 )
         {
             
             player.ChangeState(new PlayerIdleState());
+        }
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            animator.SetFloat(XmoveAnim, 0);
+            animator.SetFloat(ZmoveAnim, 0);
+            player.ChangeState(new PlayerAttackState());
         }
         
     }
@@ -86,7 +92,12 @@ public class PlayerMoveState : IPlayerState {
             ? moveDirection * (moveSpeed * runSpeed * Time.fixedDeltaTime) 
             : moveDirection * (moveSpeed * Time.fixedDeltaTime);
 
-        
+        if (moveDirection.sqrMagnitude > 0.01f)
+        {
+            Vector3 flatDirection = new Vector3(moveDirection.x, 0, moveDirection.z); // y 제거!
+            Quaternion targetRotation = Quaternion.LookRotation(flatDirection);
+            player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+        }
         
         animator.SetFloat(XmoveAnim, animX, 0.1f, Time.deltaTime);
         animator.SetFloat(ZmoveAnim, animZ, 0.1f, Time.deltaTime);

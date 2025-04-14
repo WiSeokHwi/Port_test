@@ -265,6 +265,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 330745322}
+  - component: {fileID: 330745323}
   m_Layer: 0
   m_Name: CameraHolder
   m_TagString: Untagged
@@ -286,8 +287,24 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 330585546}
-  m_Father: {fileID: 975642888}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &330745323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330745321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 136ad31f585800a4c96ea2e6c7f5c6c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HeadTransform: {fileID: 0}
+  mouseSensitivity: 100
+  player: {fileID: 975642888}
+  offset: {x: 0, y: 1.7, z: 0.14}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -542,7 +559,6 @@ GameObject:
   m_Component:
   - component: {fileID: 975642888}
   - component: {fileID: 975642892}
-  - component: {fileID: 975642894}
   - component: {fileID: 975642891}
   - component: {fileID: 975642890}
   - component: {fileID: 975642889}
@@ -568,7 +584,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1538953046}
-  - {fileID: 330745322}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &975642889
@@ -736,6 +751,7 @@ MonoBehaviour:
   runSpeed: 1.5
   jumpSpeed: 3.5
   cameraTransform: {fileID: 330745322}
+  isAttacking: 0
 --- !u!95 &975642893
 Animator:
   serializedVersion: 7
@@ -758,20 +774,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &975642894
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 975642887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 136ad31f585800a4c96ea2e6c7f5c6c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cameraTransform: {fileID: 330745322}
-  mouseSensitivity: 100
 --- !u!1 &1309245557
 GameObject:
   m_ObjectHideFlags: 0
@@ -876,5 +878,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 330745322}
   - {fileID: 975642888}
   - {fileID: 1309245560}

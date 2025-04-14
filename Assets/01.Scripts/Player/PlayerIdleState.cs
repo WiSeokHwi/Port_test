@@ -17,6 +17,11 @@ public class PlayerIdleState : IPlayerState {
         if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded()) {
             player.ChangeState(new PlayerJumpState());
         }
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            player.ChangeState(new PlayerAttackState());
+        }
     }
     
 

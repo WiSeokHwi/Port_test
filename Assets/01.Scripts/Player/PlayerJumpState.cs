@@ -20,7 +20,12 @@ public class PlayerJumpState : IPlayerState {
 
     public void InputHandler()
     {
-        
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.IsName("Jumping") && stateInfo.normalizedTime >= 1f && player.IsGrounded())
+        {
+            player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            player.ChangeState(new PlayerIdleState());
+        }
     }
 
     public void Update() {
@@ -29,12 +34,7 @@ public class PlayerJumpState : IPlayerState {
 
     public void PhysicsUpdate()
     {
-        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-        if (stateInfo.IsName("Jumping") && stateInfo.normalizedTime >= 1f && player.IsGrounded())
-        {
-            player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-            player.ChangeState(new PlayerIdleState());
-        }
+        
     }
 
     public void Exit() { }

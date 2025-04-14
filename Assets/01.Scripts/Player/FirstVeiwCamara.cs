@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class FirstVeiwCamara : MonoBehaviour
 {
-    public Transform cameraTransform;      // Main Camera
+    public Transform HeadTransform;      // Main Camera
     public float mouseSensitivity = 100f;
+    public Transform player;
+    public Vector3 offset = new Vector3(0, 5, -7);
+
 
 
     float xRotation = 0f;
@@ -14,7 +17,11 @@ public class FirstVeiwCamara : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
     }
-
+    
+    void LateUpdate()
+    {
+        transform.position = player.position + offset;
+    }
     void Update()
     {
         // 마우스 입력
@@ -28,8 +35,8 @@ public class FirstVeiwCamara : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -90f, 70f);  // 상하 회전 제한
 
         // 카메라 회전만 처리 (캐릭터는 회전하지 않음)
-        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        transform.rotation = Quaternion.Euler(0f, yRotation, 0f); // 캐릭터는 Y축만 회전
+        transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        
 
         
     }
