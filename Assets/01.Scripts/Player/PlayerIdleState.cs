@@ -11,6 +11,8 @@ public class PlayerIdleState : IPlayerState {
 
     public void InputHandler()
     {
+        float mouseY = Input.GetAxis("Mouse Y");
+            
         if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) {
             player.ChangeState(new PlayerMoveState());
         }
@@ -31,7 +33,10 @@ public class PlayerIdleState : IPlayerState {
 
     public void PhysicsUpdate()
     {
-        
+        Quaternion targetRotation = Quaternion.Euler(0, player.cameraTransform.eulerAngles.y, 0);
+
+        // 캐릭터가 카메라와 일치하는 방향으로 회전
+        player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
     }
 
     public void Exit() { }

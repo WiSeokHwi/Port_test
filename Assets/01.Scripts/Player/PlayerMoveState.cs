@@ -92,12 +92,13 @@ public class PlayerMoveState : IPlayerState {
             ? moveDirection * (moveSpeed * runSpeed * Time.fixedDeltaTime) 
             : moveDirection * (moveSpeed * Time.fixedDeltaTime);
 
-        if (moveDirection.sqrMagnitude > 0.01f)
-        {
-            Vector3 flatDirection = new Vector3(moveDirection.x, 0, moveDirection.z); // y 제거!
-            Quaternion targetRotation = Quaternion.LookRotation(flatDirection);
-            player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
-        }
+        Quaternion targetRotation = Quaternion.Euler(0, player.cameraTransform.eulerAngles.y, 0);
+
+        // 캐릭터가 카메라와 일치하는 방향으로 회전
+        player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+
+
+
         
         animator.SetFloat(XmoveAnim, animX, 0.1f, Time.deltaTime);
         animator.SetFloat(ZmoveAnim, animZ, 0.1f, Time.deltaTime);

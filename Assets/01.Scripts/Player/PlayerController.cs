@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour {
     void FixedUpdate()
     {
         _currentState?.PhysicsUpdate();
+        // 카메라의 y축 회전만 따라가도록 설정
         
     }
 
