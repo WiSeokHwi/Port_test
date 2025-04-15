@@ -1,55 +1,67 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
     private PlayerController player;
     private Animator animator;
-    private bool isComboAttack;
-    
+
+    private List<int> currentComboHashes;
+    private WeaponComboData comboData;
+
+    private int currentComboIndex = 0;
+    private bool inputQueued = false;
+
     public void Enter(PlayerController player)
     {
-        animator =player._animator;
         this.player = player;
+        this.animator = player._animator;
+
+        comboData = player.CurrentWeapon.comboData;
+        currentComboHashes = comboData.GetStateHashes("Base Layer"); // 또는 "MoveLayer" 등 실제 레이어명
+
+        currentComboIndex = 0;
+        inputQueued = false;
         
-        player._animator.SetTrigger("Attack");
-        isComboAttack = false;  // 콤보 상태 초기화
+
+        animator.SetTrigger("Attack");
     }
 
+    
     public void InputHandler()
     {
+        
+        if (animator.IsInTransition(0)) return;
+
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
-        // 공격 애니메이션이 끝날 때까지는 Idle로 넘어가지 않도록
-        if (stateInfo.normalizedTime < 1f && stateInfo.IsTag("Attack"))
+        if (currentComboHashes.Contains(stateInfo.fullPathHash))
         {
-            return; // 애니메이션이 끝나지 않았으면 아무 작업도 하지 않음
-        }
+            if (Input.GetMouseButtonDown(0))
+                inputQueued = true;
 
-        // 공격 중 마우스 클릭을 다시 했을 경우 다음 공격으로 넘어가게 처리
-        if (Input.GetMouseButtonDown(0) && !isComboAttack)
-        {
-            player._animator.SetTrigger("Attack");
-            isComboAttack = true; // 콤보 공격이 시작됨
+            if (stateInfo.normalizedTime <= 0.7f && inputQueued)
+            {
+                if (inputQueued && currentComboIndex < comboData.maxComboCount - 1)
+                {
+                    currentComboIndex++;
+                    animator.SetTrigger("Attack");
+                    inputQueued = false;
+                }
+                else if (stateInfo.normalizedTime >= 1f)
+                {
+                    player.ChangeState(new PlayerIdleState());
+                }
+            }
         }
-        else if (stateInfo.normalizedTime >= 1f && stateInfo.IsTag("Attack") && !isComboAttack)
+        else
         {
-            // 공격이 끝났을 때 Idle로 전환 (콤보 공격이 아닌 경우)
             player.ChangeState(new PlayerIdleState());
         }
     }
 
-    public void Update()
-    {
-        
-    }
-
-    public void PhysicsUpdate()
-    {
-        
-    }
-
-    public void Exit()
-    {
-        isComboAttack = false;
-    }
+    public void Update() { }
+    public void PhysicsUpdate() { }
+    public void Exit() { }
 }

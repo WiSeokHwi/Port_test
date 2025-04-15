@@ -805,10 +805,10 @@ MonoBehaviour:
   _animator: {fileID: 0}
   rb: {fileID: 0}
   cameraTransform: {fileID: 392979733}
+  CurrentWeapon: {fileID: 11400000, guid: 521ec36b6263a4b4c922f554d611afe2, type: 2}
   moveSpeed: 1.5
   runSpeed: 1.5
   jumpSpeed: 3.5
-  isAttacking: 0
 --- !u!95 &975642893
 Animator:
   serializedVersion: 7

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
@@ -8,12 +10,12 @@ public class PlayerController : MonoBehaviour {
     public Rigidbody rb;
     public Transform cameraTransform;
     
+    public Weapon CurrentWeapon;
         
     public float moveSpeed = 1.3f;
     public float runSpeed = 1.5f;
     public float jumpSpeed = 10f;
-    public bool isAttacking = false;
-    
+
     
     void Awake()
     {
@@ -65,4 +67,5 @@ public class PlayerController : MonoBehaviour {
     public void SetAnimation(string animName) {
         // 애니메이션 실행
     }
+
 }
