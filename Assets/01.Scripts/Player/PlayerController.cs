@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour {
     void Update()
     {
         _currentState?.InputHandler();
+        _currentState?.Update();
     }
     void FixedUpdate()
     {

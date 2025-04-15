@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   subStateMachineName: LongSwordAttack
   comboStateNames:
-  - Attack1
-  - Attack2
-  - Attack3
+  - {fileID: 7400000, guid: a1076257ee172634e8bf99dc6a626e44, type: 2}
+  - {fileID: 7400000, guid: 9bd748d90c86f764f81243254c9ae4a2, type: 2}
+  - {fileID: 7400000, guid: e520d7689eb94e345b34308a6d3807c6, type: 2}
