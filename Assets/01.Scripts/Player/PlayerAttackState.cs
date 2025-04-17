@@ -16,11 +16,14 @@ public class PlayerAttackState : IPlayerState
     
     
     private Coroutine layerBlendCoroutine;
+    private Transform cameraTransform;
 
     public void Enter(PlayerController player)
     {
         this.player = player;
         this.animator = player._animator;
+        animator.applyRootMotion = true;
+        cameraTransform = player.cameraTransform;
         comboData = player.CurrentWeapon.comboData;
         currentComboHashes = comboData.GetStateHashes("Base Layer"); // 또는 "MoveLayer" 등 실제 레이어명
     
@@ -41,22 +44,12 @@ public class PlayerAttackState : IPlayerState
 
         if (currentComboHashes.Contains(stateInfo.fullPathHash))
         {
-            if (Input.GetMouseButtonDown(0))
-                inputQueued = true;
-
-            if (stateInfo.normalizedTime <= 0.95f && inputQueued)
+            // 마우스 클릭, 애니메이션 재생이 70% 전일때 
+            if (Input.GetMouseButtonDown(0) && stateInfo.normalizedTime <= 0.7f)
             {
-                if (inputQueued && currentComboIndex < comboData.maxComboCount - 1)
-                {
-                    currentComboIndex++;
-                    animator.SetTrigger("Attack");
-                    inputQueued = false;
-                }
-                else if (stateInfo.normalizedTime >= 1f)
-                {
-                    player.ChangeState(new PlayerIdleState());
-                }
+                Attack();
             }
+                
         }
         else
         {
@@ -65,12 +58,15 @@ public class PlayerAttackState : IPlayerState
     }
 
     public void Update()
-    { }
+    {
+        
+    }
     public void PhysicsUpdate() { }
 
     public void Exit()
     {
         layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 1f));
+        animator.applyRootMotion = false;
     }
     private IEnumerator SetLayerWeightSmooth(string layerName, float targetWeight, float duration = 0.1f)
     {
@@ -87,5 +83,12 @@ public class PlayerAttackState : IPlayerState
         }
 
         animator.SetLayerWeight(layerIndex, targetWeight);
+    }
+
+    private void Attack()
+    {
+        if (animator.IsInTransition(0)) return;
+        
+        animator.SetTrigger("Attack");
     }
 }
