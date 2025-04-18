@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour {
     public Weapon CurrentWeapon;
         
     public float moveSpeed = 1.3f;
-    public float runSpeed = 1.5f;
+    public float runSpeed = 2f;
     public float jumpSpeed = 10f;
 
     

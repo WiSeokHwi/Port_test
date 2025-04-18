@@ -30,7 +30,7 @@ public class PlayerAttackState : IPlayerState
         currentComboIndex = 0;
         inputQueued = false;
 
-        layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 0f));
+        //layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 0f));
         animator.SetTrigger("Attack");
     }
 
@@ -49,6 +49,11 @@ public class PlayerAttackState : IPlayerState
             {
                 Attack();
             }
+            else if (stateInfo.normalizedTime >= 1f)
+            {
+                player.ChangeState(new PlayerIdleState());
+            }
+           
                 
         }
         else
@@ -65,25 +70,25 @@ public class PlayerAttackState : IPlayerState
 
     public void Exit()
     {
-        layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 1f));
+        //layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 1f));
         animator.applyRootMotion = false;
     }
-    private IEnumerator SetLayerWeightSmooth(string layerName, float targetWeight, float duration = 0.1f)
-    {
-        int layerIndex = animator.GetLayerIndex(layerName);
-        float currentWeight = animator.GetLayerWeight(layerIndex);
-        float time = 0f;
+    //private IEnumerator SetLayerWeightSmooth(string layerName, float targetWeight, float duration = 0.1f)
+    //{
+    //    int layerIndex = animator.GetLayerIndex(layerName);
+    //    float currentWeight = animator.GetLayerWeight(layerIndex);
+    //    float time = 0f;
 
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            float weight = Mathf.Lerp(currentWeight, targetWeight, time / duration);
-            animator.SetLayerWeight(layerIndex, weight);
-            yield return null;
-        }
+    //    while (time < duration)
+    //    {
+    //        time += Time.deltaTime;
+    //        float weight = Mathf.Lerp(currentWeight, targetWeight, time / duration);
+    //        animator.SetLayerWeight(layerIndex, weight);
+    //        yield return null;
+    //    }
 
-        animator.SetLayerWeight(layerIndex, targetWeight);
-    }
+    //    animator.SetLayerWeight(layerIndex, targetWeight);
+    //}
 
     private void Attack()
     {
