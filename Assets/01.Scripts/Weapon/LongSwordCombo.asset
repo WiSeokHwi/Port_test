@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d8bd7c3afe079649a16f02d8fb43f0b, type: 3}
   m_Name: LongSwordCombo
   m_EditorClassIdentifier: 
+  animationLayerName: Combat Layer
   subStateMachineName: LongSwordAttack
   comboStateNames:
   - {fileID: 7400000, guid: f8b2fa450da1d4b4fa73933681e751ac, type: 2}

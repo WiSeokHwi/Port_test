@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
     
-    private IPlayerState _currentState;
+    public IPlayerState _currentState { get; private set; }
     public Animator _animator;
     private Vector3 LastMoveDirection;
     public Rigidbody rb;

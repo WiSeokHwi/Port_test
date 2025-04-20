@@ -31,7 +31,10 @@ public class PlayerMoveState : IPlayerState {
     public void InputHandler()
     {
         isRun = Input.GetKey(KeyCode.LeftShift);
-
+        if (Input.GetKeyDown(KeyCode.T) && !player.equipped)
+        {
+            player.equipped = true;
+        }
         if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded())
         {
             animator.SetFloat(XmoveAnim, 0);

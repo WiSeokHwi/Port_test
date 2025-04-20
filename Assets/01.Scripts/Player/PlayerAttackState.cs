@@ -1,17 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using NUnit.Framework;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
     private PlayerController player;
     private Animator animator;
+    private List<int> currentWeapone;
 
-    private List<int> currentComboHashes;
-    private WeaponComboData comboData;
-
+    private int weaponLayerIndex;
     
-
     
     
     private Coroutine layerBlendCoroutine;
@@ -21,10 +21,11 @@ public class PlayerAttackState : IPlayerState
     {
         this.player = player;
         this.animator = player._animator;
+        currentWeapone = this.player.CurrentWeapon.comboData.GetStateHashes();
+        weaponLayerIndex = animator.GetLayerIndex(this.player.CurrentWeapon.comboData.animationLayerName);
+ 
         animator.applyRootMotion = true;
         cameraTransform = player.cameraTransform;
-        comboData = player.CurrentWeapon.comboData;
-        currentComboHashes = comboData.GetStateHashes("Combat Layer"); // 또는 "MoveLayer" 등 실제 레이어명
         
         //layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 0f));
         
@@ -35,19 +36,20 @@ public class PlayerAttackState : IPlayerState
     public void InputHandler()
     {
 
-        if (animator.IsInTransition(0)) return;
+        if (animator.IsInTransition(weaponLayerIndex)) return;
 
-        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(weaponLayerIndex);
 
-        if (currentComboHashes.Contains(stateInfo.fullPathHash))
+        if (currentWeapone.Contains(stateInfo.fullPathHash))
         {
             Debug.Log("콤보 메서드 진입");
             // 마우스 클릭, 애니메이션 재생이 70% 전일때 
             if (Input.GetMouseButtonDown(0) && stateInfo.normalizedTime <= 0.7f)
             {
+                Debug.Log("콤보 진입");
                 Attack();
             }
-            else if (stateInfo.normalizedTime >= 1f && !player.isAttacking)
+            else if (stateInfo.normalizedTime >= 0.95f)
             {
                 player.ChangeState(new PlayerIdleState());
             }
@@ -85,7 +87,7 @@ public class PlayerAttackState : IPlayerState
 
     private void Attack()
     {
-        if (animator.IsInTransition(0)) return;
+        if (animator.IsInTransition(weaponLayerIndex)) return;
         
         
         animator.SetTrigger("Attack");

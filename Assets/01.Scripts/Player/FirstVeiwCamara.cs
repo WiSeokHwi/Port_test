@@ -8,14 +8,17 @@ public class FirstVeiwCamara : MonoBehaviour
     public Transform headRig;
     float xRotation = 0f;
     float yRotation = 0f;
+    public PlayerController player;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        
     }
     
     void Update()
     {
+        if (player._currentState is PlayerAttackState) return;
         // 마우스 입력
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
