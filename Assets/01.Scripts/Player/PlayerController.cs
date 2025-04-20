@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour {
     public float moveSpeed = 1.3f;
     public float runSpeed = 2f;
     public float jumpSpeed = 10f;
+    public bool isAttacking = false;
+    public bool equipped = false;
 
     
     void Awake()
@@ -30,6 +32,8 @@ public class PlayerController : MonoBehaviour {
     {
         _currentState?.InputHandler();
         _currentState?.Update();
+        Debug.Log("공격 여부" + isAttacking);
+        Debug.Log("현재 상태" + _currentState);
     }
     void FixedUpdate()
     {
@@ -68,5 +72,15 @@ public class PlayerController : MonoBehaviour {
     public void SetAnimation(string animName) {
         // 애니메이션 실행
     }
+    public void AttackStart()
+    {
+        isAttacking = true;
+    }
+
+    public void AttackEnd()
+    {
+        isAttacking = false;
+    }
+    
 
 }
