@@ -1,7 +1,7 @@
 
 public interface IPlayerState {
     void Enter(PlayerController player);
-    void InputHandler();
+    void HandleInput(PlayerInputCommend input);
     void Update();
 
     void PhysicsUpdate();

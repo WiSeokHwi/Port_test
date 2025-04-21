@@ -1,7 +1,9 @@
 using UnityEngine;
 public class PlayerMoveState : IPlayerState {
     
-    private PlayerController player;
+    private PlayerController _player;
+    private PlayerInputCommend _input;
+
     private float moveSpeed;
     private float runSpeed;
     private Vector3 movement;
@@ -20,7 +22,7 @@ public class PlayerMoveState : IPlayerState {
     public void Enter(PlayerController player) {
         Debug.Log("이동");
         animator =player._animator;
-        this.player = player;
+        _player = player;
         moveSpeed = player.moveSpeed;
         runSpeed = player.runSpeed;
         XmoveAnim = Animator.StringToHash("XMove");
@@ -28,46 +30,42 @@ public class PlayerMoveState : IPlayerState {
         
     }
 
-    public void InputHandler()
+    public void HandleInput(PlayerInputCommend input)
     {
-        isRun = Input.GetKey(KeyCode.LeftShift);
-        if (Input.GetKeyDown(KeyCode.T) && !player.equipped)
-        {
-            player.equipped = true;
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded())
-        {
-            animator.SetFloat(XmoveAnim, 0);
-            animator.SetFloat(ZmoveAnim, 0);
-            
-            player.ChangeState(new PlayerJumpState());
-        }
         
-        if( animX == 0 && animZ == 0 )
-        {
-            
-            player.ChangeState(new PlayerIdleState());
-        }
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            animator.SetFloat(XmoveAnim, 0);
-            animator.SetFloat(ZmoveAnim, 0);
-            player.ChangeState(new PlayerAttackState());
-        }
-        
+        _input = input;
     }
 
 
 
     public void Update()
     {
+        if (_input.JumpPressed && _input.IsGrounded)
+        {
+            animator.SetFloat(XmoveAnim, 0);
+            animator.SetFloat(ZmoveAnim, 0);
+            
+            _player.ChangeState(new PlayerJumpState());
+        }
         
+        if( _input.MoveInput.magnitude <= 0f )
+        {
+            
+            _player.ChangeState(new PlayerIdleState());
+        }
+        if (_input.AttackPressed)
+        {
+            animator.SetFloat(XmoveAnim, 0);
+            animator.SetFloat(ZmoveAnim, 0);
+            _player.ChangeState(new PlayerAttackState());
+        }
     }
 
     public void PhysicsUpdate()
     {
-        float x = Input.GetAxis("Horizontal"); // ← Raw 제거!
-        float z = Input.GetAxis("Vertical");
+        isRun = _input.RunPressed;
+        float x = _input.MoveInput.x;
+        float z = _input.MoveInput.y;
         
         float targetSpeed = isRun ? 1f : 0.5f;
 
@@ -79,8 +77,8 @@ public class PlayerMoveState : IPlayerState {
         animX = Mathf.SmoothDamp(animX, targetAnimX, ref animXVelocity, smoothTime);
         animZ = Mathf.SmoothDamp(animZ, targetAnimZ, ref animZVelocity, smoothTime);
         
-        Vector3 camForward = player.cameraTransform.forward;
-        Vector3 camRight = player.cameraTransform.right;
+        Vector3 camForward = _player.cameraTransform.forward;
+        Vector3 camRight = _player.cameraTransform.right;
 
 // y축을 기준으로만 방향을 잡기 위해 수직 방향 제거
         camForward.y = 0;
@@ -95,10 +93,10 @@ public class PlayerMoveState : IPlayerState {
             ? moveDirection * (moveSpeed * runSpeed * Time.fixedDeltaTime) 
             : moveDirection * (moveSpeed * Time.fixedDeltaTime);
 
-        Quaternion targetRotation = Quaternion.Euler(0, player.cameraTransform.eulerAngles.y, 0);
+        Quaternion targetRotation = Quaternion.Euler(0, _player.cameraTransform.eulerAngles.y, 0);
 
         // 캐릭터가 카메라와 일치하는 방향으로 회전
-        player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+        _player.transform.rotation = Quaternion.Slerp(_player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
 
 
 
@@ -107,8 +105,9 @@ public class PlayerMoveState : IPlayerState {
         animator.SetFloat(ZmoveAnim, animZ, 0.1f, Time.deltaTime);
         
         
-        player.Move(movement);
+        _player.Move(movement);
     }
 
     public void Exit() { }
+
 }

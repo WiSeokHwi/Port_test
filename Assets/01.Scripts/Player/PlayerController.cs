@@ -16,7 +16,9 @@ public class PlayerController : MonoBehaviour {
     public float runSpeed = 2f;
     public float jumpSpeed = 10f;
     public bool isAttacking = false;
-    public bool equipped = false;
+    public bool equipped  = false;
+    
+
 
     
     void Awake()
@@ -30,7 +32,6 @@ public class PlayerController : MonoBehaviour {
     
     void Update()
     {
-        _currentState?.InputHandler();
         _currentState?.Update();
         Debug.Log("공격 여부" + isAttacking);
         Debug.Log("현재 상태" + _currentState);
@@ -63,10 +64,9 @@ public class PlayerController : MonoBehaviour {
         LastMoveDirection = Vector3.zero;
     }
 
-    public bool IsGrounded()
+    public void HandleInput(PlayerInputCommend input)
     {
-        float checkDistance = 0.1f; // 발 밑 거리
-        return Physics.Raycast(transform.position, Vector3.down, checkDistance);
+        _currentState?.HandleInput(input);
     }
 
     public void SetAnimation(string animName) {

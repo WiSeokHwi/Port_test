@@ -6,10 +6,10 @@ using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
-    private PlayerController player;
+    private PlayerController _player;
     private Animator animator;
     private List<int> currentWeapone;
-
+    private PlayerInputCommend _input;
     private int weaponLayerIndex;
     
     
@@ -19,10 +19,10 @@ public class PlayerAttackState : IPlayerState
 
     public void Enter(PlayerController player)
     {
-        this.player = player;
+        _player = player;
         this.animator = player._animator;
-        currentWeapone = this.player.CurrentWeapon.comboData.GetStateHashes();
-        weaponLayerIndex = animator.GetLayerIndex(this.player.CurrentWeapon.comboData.animationLayerName);
+        currentWeapone = _player.CurrentWeapon.comboData.GetStateHashes();
+        weaponLayerIndex = animator.GetLayerIndex(_player.CurrentWeapon.comboData.animationLayerName);
  
         animator.applyRootMotion = true;
         cameraTransform = player.cameraTransform;
@@ -32,8 +32,8 @@ public class PlayerAttackState : IPlayerState
         animator.SetTrigger("Attack");
     }
 
-    
-    public void InputHandler()
+
+    public void HandleInput(PlayerInputCommend input)
     {
 
         if (animator.IsInTransition(weaponLayerIndex)) return;
@@ -51,7 +51,7 @@ public class PlayerAttackState : IPlayerState
             }
             else if (stateInfo.normalizedTime >= 0.95f)
             {
-                player.ChangeState(new PlayerIdleState());
+                _player.ChangeState(new PlayerIdleState());
             }
         }
         

@@ -1,34 +1,36 @@
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class PlayerIdleState : IPlayerState {
-    private PlayerController player;
+    private PlayerController _player;
+    private PlayerInputCommend _input;
 
     public void Enter(PlayerController player) {
-        this.player = player;
+        _player = player;
         Debug.Log("대기");
         
     }
 
-    public void InputHandler()
+    public void HandleInput(PlayerInputCommend input)
     {
-        float mouseY = Input.GetAxis("Mouse Y");
-            
-        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) {
-            player.ChangeState(new PlayerMoveState());
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && player.IsGrounded()) {
-            player.ChangeState(new PlayerJumpState());
-        }
-
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            player.ChangeState(new PlayerAttackState());
-        }
+        _input = input;
     }
     
 
     public void Update() {
-        
+        if (_input.MoveInput.magnitude >= 0f)
+        {
+            _player.ChangeState(new PlayerMoveState());
+        }
+        else if (_input.JumpPressed && _input.IsGrounded)
+        {
+            _player.ChangeState(new PlayerJumpState());
+        }
+
+        else if (_input.AttackPressed)
+        {
+            _player.ChangeState(new PlayerAttackState());
+        }
     }
 
     public void PhysicsUpdate()

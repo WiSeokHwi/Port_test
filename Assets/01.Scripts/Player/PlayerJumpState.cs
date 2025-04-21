@@ -18,10 +18,10 @@ public class PlayerJumpState : IPlayerState {
     }
 
 
-    public void InputHandler()
+    public void HandleInput(PlayerInputCommend input)
     {
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-        if (stateInfo.IsName("Jumping") && stateInfo.normalizedTime >= 1f && player.IsGrounded())
+        if (stateInfo.IsName("Jumping") && stateInfo.normalizedTime >= 1f && input.IsGrounded)
         {
             player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
             player.ChangeState(new PlayerIdleState());
