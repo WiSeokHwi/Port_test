@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Long Sword
   m_EditorClassIdentifier: 
   weaponName: LongSword
-  weaponPrefab: {fileID: 2745957250919531819, guid: f83804f9672abf04497b96be9090079d, type: 3}
+  weaponPrefab: {fileID: 3697984261696429270, guid: 2d65dba7e21d3c149b1680e0808eb15c, type: 3}
   comboData: {fileID: 11400000, guid: 18ddb890937b363479cc406690f408fd, type: 2}

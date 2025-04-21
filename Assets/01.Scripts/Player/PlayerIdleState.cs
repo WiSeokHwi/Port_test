@@ -18,7 +18,7 @@ public class PlayerIdleState : IPlayerState {
     
 
     public void Update() {
-        if (_input.MoveInput.magnitude >= 0f)
+        if (_input.MoveInput.magnitude > 0f)
         {
             _player.ChangeState(new PlayerMoveState());
         }
@@ -27,9 +27,14 @@ public class PlayerIdleState : IPlayerState {
             _player.ChangeState(new PlayerJumpState());
         }
 
-        else if (_input.AttackPressed)
+        else if (_input.AttackPressed && _player.equipped)
         {
             _player.ChangeState(new PlayerAttackState());
+        }
+        if (_input.EquipPressed)
+        {
+            _player.WeaponEquip();
+            
         }
     }
 
