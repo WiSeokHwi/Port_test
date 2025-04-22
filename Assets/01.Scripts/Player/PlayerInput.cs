@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerInput : MonoBehaviour
 {
     public PlayerController playerController;
-
+    public LayerMask groundLayer;
     void Start()
     {
         if (playerController == null)
@@ -20,13 +20,15 @@ public class PlayerInput : MonoBehaviour
             Input.GetKeyDown(KeyCode.Space),
             Input.GetMouseButtonDown(0),
             Input.GetKey(KeyCode.LeftShift),
-            Physics.Raycast(transform.position, Vector3.down, 0.1f),
+            Physics.Raycast(transform.position, Vector3.down, 0.02f, groundLayer),
             Input.GetKeyDown(KeyCode.T),
             Input.GetKeyDown(KeyCode.LeftShift)
     
         );
-
+        Debug.DrawRay(transform.position, Vector3.down, Color.red, 0.02f);
         playerController.HandleInput(input);
-        Debug.Log("땅에 닿았는가? :" + input.IsGrounded);
+        
     }
+    
+    
 }

@@ -6,15 +6,16 @@ public class PlayerJumpState : IPlayerState {
     private AnimatorStateInfo stateInfo;
     private PlayerInputCommend _input;
     
+    
     private static readonly int JumpTrigger = Animator.StringToHash("Jump");
-
+    
     private int WeaponLayer;
 
     public void Enter(PlayerController player) {
         
-        Debug.Log("점프!");
-        this.player = player;
         
+        this.player = player;
+        int jumpAnimHash = Animator.StringToHash("Jumping");
         animator = player._animator;
         // 점프 애니메이션 재생
         WeaponLayer = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
@@ -33,7 +34,7 @@ public class PlayerJumpState : IPlayerState {
 
     public void Update() 
     {
-        if (_input.IsGrounded && stateInfo.normalizedTime >= 0.9f)
+        if (_input.IsGrounded)
         {
             player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
             player.ChangeState(new PlayerIdleState());

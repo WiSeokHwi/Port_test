@@ -1,5 +1,7 @@
 
-public interface IPlayerState {
+public interface IPlayerState
+{
+    
     void Enter(PlayerController player);
     void HandleInput(PlayerInputCommend input);
     void Update();

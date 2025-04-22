@@ -1,6 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerController : MonoBehaviour {
     
@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField] private GameObject WeaponPoseR;
     [SerializeField] private GameObject DrawWeaponPoseR;
+    [SerializeField] public Rig HeadOverray;
     private GameObject weapone;
     
 

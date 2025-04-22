@@ -23,7 +23,7 @@ public class PlayerMoveState : IPlayerState {
     private float doubleTapThreshold = 0.5f; // 0.3초 이내에 두번 누르면 구르기
     
     public void Enter(PlayerController player) {
-        Debug.Log("이동");
+        
         animator =player._animator;
         _player = player;
         moveSpeed = player.moveSpeed;
@@ -50,6 +50,7 @@ public class PlayerMoveState : IPlayerState {
         {
             if (Time.time - lastShiftTapTime < doubleTapThreshold)
             {
+                
                 // 구르기 실행
                 _player.ChangeState(new PlayerRollState());
                 lastShiftTapTime = -1f; // 초기화

@@ -7,7 +7,7 @@ public class PlayerIdleState : IPlayerState {
 
     public void Enter(PlayerController player) {
         _player = player;
-        Debug.Log("대기");
+        
         
     }
 
