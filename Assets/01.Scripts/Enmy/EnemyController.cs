@@ -1,14 +1,25 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
 {
-    public EnemyState currentState { get; private set; }
-    public GameObject Target;
+    private EnemyState currentState { get; set; }
+    [SerializeField] private Transform target;
+    public Transform Target => target;
+    [SerializeField] private NavMeshAgent agent;
+    public NavMeshAgent Agent => agent;
+    [SerializeField] private Transform homePosition;
+    public Transform HomePosition => homePosition;
+    
+    public Transform[] waypoints;
+    private EnemyDetection detection;
 
 
     void Awake()
     {
-        Target = GameObject.FindGameObjectWithTag("Player");
+        agent = GetComponent<NavMeshAgent>();
+        homePosition = transform;
+        detection = GetComponent<EnemyDetection>();
     }
     void Start()
     {
@@ -19,16 +30,12 @@ public class EnemyController : MonoBehaviour
     void Update()
     {
         currentState.Update();
+        
     }
 
     void FixedUpdate()
     {   
         currentState.PhysicsUpdate();
-    }
-    
-    public void MoveTowards(Vector3 targetPos)
-    {
-        // 이동 코드
     }
 
     public void ChangeState(EnemyState newState)
@@ -37,6 +44,11 @@ public class EnemyController : MonoBehaviour
         currentState = newState;
         
         currentState.Enter();
+    }
+
+    public void SetTarget(Transform newTarget)
+    {
+        target = newTarget;
     }
 }
 
