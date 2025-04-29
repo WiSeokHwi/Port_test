@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour {
     public float jumpSpeed = 10f;
     public bool isAttacking = false;
     public bool equipped  = false;
+    public bool isCloaking = false;
     private int Equip;
 
     [SerializeField] private GameObject WeaponPoseR;

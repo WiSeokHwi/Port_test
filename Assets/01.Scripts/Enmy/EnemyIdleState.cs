@@ -1,4 +1,4 @@
-using System.Collections;
+
 using UnityEngine;
 
 public class EnemyIdleState : EnemyState
@@ -6,17 +6,25 @@ public class EnemyIdleState : EnemyState
     public EnemyIdleState(EnemyController enemy) : base(enemy){ }
     private int pathIndex;
     private float timer;
+    private GameObject getTarget;
+    private float cloakingCheckAmount;
+    private LayerMask detectionLayer = LayerMask.GetMask("Player");
     public override void Enter()
     {
         base.Enter(); 
         agent.isStopped = false;
         enemy.SetTarget(enemy.HomePosition);
-        agent.SetDestination(enemy.Target.position);
-        
+        agent.SetDestination(enemy.Target.transform.position);
+        agent.speed = enemy.walkSpeed;
+        cloakingCheckAmount = enemy.cloakingCheckAmount;
+
     }
 
     public override void Update()
     {
+        getTarget = null;
+        getTarget = enemy.enenmySensor.DetectEnemies();
+        
         // 도착지점에 도달했을 때
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
@@ -39,9 +47,24 @@ public class EnemyIdleState : EnemyState
                 }
 
                 // 새로운 타겟 설정
-                enemy.SetTarget(enemy.waypoints[pathIndex]);
-                agent.SetDestination(enemy.Target.position);
+                enemy.SetTarget(enemy.waypoints[pathIndex].gameObject);
+                agent.SetDestination(enemy.Target.transform.position);
             }
+        }
+        Collider[] detectedColliders = Physics.OverlapSphere(enemy.transform.position, cloakingCheckAmount, detectionLayer);
+
+        foreach (Collider col in detectedColliders)
+        {
+            if (!col.GetComponent<PlayerController>().isCloaking)
+            {
+                enemy.ChangeState(new EnemyChaseState(enemy));
+            }
+        }
+
+        if (getTarget)
+        {
+            enemy.SetTarget(getTarget.gameObject);
+            enemy.ChangeState(new EnemyCheckState(enemy));
         }
     }
 
