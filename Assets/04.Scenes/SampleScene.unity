@@ -5155,9 +5155,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd1454f8a94633944bcdbbcfc80ac681, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 915796812}
+  target: {x: 0, y: 0, z: 0}
   agent: {fileID: 7978595286108944794}
-  homePosition: {fileID: 915796812}
+  homePosition: {fileID: 915796813}
   enenmySensor: {fileID: 674121642}
   waypoints:
   - {fileID: 643754439}
@@ -5169,6 +5169,10 @@ MonoBehaviour:
   cloakingCheckAmount: 3
   walkSpeed: 1.2
   runSpeed: 2.5
+  isTurnRound: 0
+  turnRadius: 4
+  turnDegreeStepValue: 120
+  turnAngleThreshold: 90
 --- !u!23 &7978595286108944799
 MeshRenderer:
   m_ObjectHideFlags: 0

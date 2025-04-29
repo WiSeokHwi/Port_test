@@ -22,7 +22,7 @@ public class EnemySensor : MonoBehaviour
 
 
     // ReSharper disable Unity.PerformanceAnalysis
-    public GameObject DetectEnemies()
+    public Vector3 DetectEnemies()
     {
         if (!enemyController)
         {
@@ -55,24 +55,24 @@ public class EnemySensor : MonoBehaviour
                 {
                     // 장애물이 없다면 적을 감지
                     
-                    return col.gameObject;
+                    return col.transform.position;
                 }
             }
         }
 
-        return null;
+        return Vector3.zero;
     }
 
     private void OnDrawGizmos()
     {
         // 타겟이 감지된 경우
-        if (DetectEnemies())
+        if (DetectEnemies() != Vector3.zero)
         {
             // 타겟의 위치에 맞춰 Gizmos 그리기
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, DetectEnemies().transform.position); // 타겟까지의 선
+            Gizmos.DrawLine(transform.position, DetectEnemies()); // 타겟까지의 선
             // detectedTarget을 기준으로도 오프셋 시각화
-            Vector3 directionToTarget = DetectEnemies().transform.position - transform.position;
+            Vector3 directionToTarget = DetectEnemies() - transform.position;
             directionToTarget.y = 0; // y축으로 계산을 안하도록 설정 (2D 평면에서만 검사)
 
             // 오프셋을 적용한 방향으로 시각화

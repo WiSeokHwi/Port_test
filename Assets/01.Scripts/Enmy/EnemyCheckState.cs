@@ -13,7 +13,7 @@ public class EnemyCheckState : EnemyState
     public override void Enter()
     {
         base.Enter();
-        detectedPosition = enemy.Target.transform.position; // 감지 당시 위치를 저장
+        detectedPosition = enemy.Target; // 감지 당시 위치를 저장
         agent.SetDestination(detectedPosition);   // 그 위치로 이동
         agent.speed = enemy.walkSpeed;
         detectionRadius = enemy.detectionRadius;

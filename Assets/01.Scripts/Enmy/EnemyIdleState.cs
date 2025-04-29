@@ -6,7 +6,7 @@ public class EnemyIdleState : EnemyState
     public EnemyIdleState(EnemyController enemy) : base(enemy){ }
     private int pathIndex;
     private float timer;
-    private GameObject getTarget;
+    private Vector3 getTarget;
     private float cloakingCheckAmount;
     private LayerMask detectionLayer = LayerMask.GetMask("Player");
     public override void Enter()
@@ -14,7 +14,7 @@ public class EnemyIdleState : EnemyState
         base.Enter(); 
         agent.isStopped = false;
         enemy.SetTarget(enemy.HomePosition);
-        agent.SetDestination(enemy.Target.transform.position);
+        agent.SetDestination(enemy.Target);
         agent.speed = enemy.walkSpeed;
         cloakingCheckAmount = enemy.cloakingCheckAmount;
 
@@ -22,7 +22,7 @@ public class EnemyIdleState : EnemyState
 
     public override void Update()
     {
-        getTarget = null;
+        getTarget = Vector3.zero;
         getTarget = enemy.enenmySensor.DetectEnemies();
         
         // 도착지점에 도달했을 때
@@ -47,8 +47,8 @@ public class EnemyIdleState : EnemyState
                 }
 
                 // 새로운 타겟 설정
-                enemy.SetTarget(enemy.waypoints[pathIndex].gameObject);
-                agent.SetDestination(enemy.Target.transform.position);
+                enemy.SetTarget(enemy.waypoints[pathIndex].transform.position);
+                agent.SetDestination(enemy.Target);
             }
         }
         Collider[] detectedColliders = Physics.OverlapSphere(enemy.transform.position, cloakingCheckAmount, detectionLayer);
@@ -61,9 +61,9 @@ public class EnemyIdleState : EnemyState
             }
         }
 
-        if (getTarget)
+        if (getTarget != Vector3.zero)
         {
-            enemy.SetTarget(getTarget.gameObject);
+            enemy.SetTarget(getTarget);
             enemy.ChangeState(new EnemyCheckState(enemy));
         }
     }
