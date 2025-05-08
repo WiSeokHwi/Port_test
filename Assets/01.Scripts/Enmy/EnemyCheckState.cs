@@ -3,24 +3,31 @@ using UnityEngine;
 public class EnemyCheckState : EnemyState
 {
     public EnemyCheckState(EnemyController enemy) : base(enemy) {}
-    private Vector3 detectedPosition; // 감지했을 때 플레이어 위치 저장
     private float timer = 0;
     private float waitTime = 1.5f;
     private LayerMask detectionLayer = LayerMask.GetMask("Player");
     private LayerMask obstacleLayer = LayerMask.GetMask("Obstacle");
     private float detectionRadius;
+    private Vector3 getTarget;
 
     public override void Enter()
     {
         base.Enter();
-        detectedPosition = enemy.Target; // 감지 당시 위치를 저장
-        agent.SetDestination(detectedPosition);   // 그 위치로 이동
+        agent.SetDestination(enemy.Target);
         agent.speed = enemy.walkSpeed;
         detectionRadius = enemy.detectionRadius;
     }
 
     public override void Update()
     {
+        getTarget = enemy.enenmySensor.DetectEnemies();
+        Debug.Log("타겟 : " + getTarget);
+        if (getTarget != Vector3.zero)
+        {
+            enemy.SetTarget(getTarget);
+            agent.SetDestination(enemy.Target);
+        }
+        
         // agent가 도착했는지 체크
         if (agent.remainingDistance <= agent.stoppingDistance)
         {

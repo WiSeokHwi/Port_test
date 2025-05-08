@@ -3,7 +3,7 @@ using UnityEngine.AI; // NavMeshAgent 사용을 위해 필수
 
 public class EnemyController : MonoBehaviour
 {
-    private Animator animator; // 애니메이션 제어를 위한 Animator 컴포넌트
+    public Animator animator; // 애니메이션 제어를 위한 Animator 컴포넌트
 
     // 현재 AI의 상태 (예: Idle, Patrol, Chase 등). 상태 패턴 사용
     private EnemyState currentState { get; set; } 
@@ -67,8 +67,7 @@ public class EnemyController : MonoBehaviour
             if (attackConeVisualizer == null)
             {
                 Debug.LogError("AttackConeVisualizer component not found! Assign it in the Inspector or ensure it's a child.");
-                enabled = false; // 시각화 없으면 스크립트 비활성화 등 에러 처리
-                return;
+                enabled = false; // 시각화 없으면 스크립트 비활성화 등 에러 처리return;
             }
         }
     }
@@ -101,7 +100,7 @@ public class EnemyController : MonoBehaviour
         TurnRound();
 
         // --- 애니메이션 속도 제어 로직 ---
-        float speedPercent = 0f; // 애니메이터에 전달할 속도 비율 (0:정지, 0.5:걷기 최대, 1:뛰기 최대)
+        float speedPercent ; // 애니메이터에 전달할 속도 비율 (0:정지, 0.5:걷기 최대, 1:뛰기 최대)
         
         // 현재 NavMeshAgent의 속도(Agent.velocity.magnitude)가 걷기 속도(walkSpeed) 이하라면
         if (Agent.velocity.magnitude <= walkSpeed)
@@ -156,6 +155,35 @@ public class EnemyController : MonoBehaviour
     {
         target = newTarget;
     }
+    public void OnAttackHitCheck()
+    {
+        LayerMask playerLayer = LayerMask.GetMask("Player");
+
+        Collider[] hitPlayers = Physics.OverlapSphere(transform.position, attackRange, playerLayer);
+
+        foreach (Collider player in hitPlayers)
+        {
+            Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
+            float angle = Vector3.Angle(transform.forward, directionToPlayer);
+
+            if (angle < attackAngle * 0.5f)
+            {
+                Debug.Log("플레이어 적중!");
+                // 여기서 플레이어에 데미지를 주기
+                //player.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage);
+            }
+        }
+    }
+    public void OnAttackAnimationEnd()
+    {
+        // 현재 상태가 EnemyAttackState인지 체크하고 처리
+        if (currentState is EnemyAttackState)
+        {
+            Agent.isStopped = false;
+            ChangeState(new EnemyChaseState(this));
+        }
+    }
+    
 
     private void TurnRound()
     {
@@ -262,21 +290,6 @@ public class EnemyController : MonoBehaviour
 
         // 최종적으로 계산되고 검증된 중간 경유지 위치 반환
         return targetPos;
-    }
-    public void StartAttackConeVizFadeIn()
-    {
-        if (attackConeVisualizer != null)
-        {
-            attackConeVisualizer.StartFadeIn();
-        }
-    }
-
-    public void StartAttackConeVizFadeOut()
-    {
-        if (attackConeVisualizer != null)
-        {
-            attackConeVisualizer.StartFadeOut();
-        }
     }
 
     // Scene 뷰에서 Gizmo를 그리는 함수 (디버깅 및 시각화 목적)

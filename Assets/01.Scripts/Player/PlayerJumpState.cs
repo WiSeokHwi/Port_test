@@ -21,7 +21,7 @@ public class PlayerJumpState : IPlayerState {
         WeaponLayer = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
         stateInfo = animator.GetCurrentAnimatorStateInfo(WeaponLayer);
         animator.SetTrigger(JumpTrigger);
-        player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+        
 
     }
 
@@ -36,7 +36,6 @@ public class PlayerJumpState : IPlayerState {
     {
         if (_input.IsGrounded)
         {
-            player.rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
             player.ChangeState(new PlayerIdleState());
         }
     }

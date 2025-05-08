@@ -21,6 +21,8 @@ public class EnemyAttackState : EnemyState
 
     public override void Enter()
     {
-        enemy.StartAttackConeVizFadeIn();
+        enemy.Agent.isStopped = true;
+        enemy.animator.SetTrigger("Attack");
     }
+    
 }

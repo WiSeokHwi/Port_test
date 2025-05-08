@@ -69,9 +69,7 @@ public class EnemyChaseState : EnemyState
                 {
                     // 공격 상태로 전환 (EnemyAttackState는 별도로 구현되어 있어야 함)
                     // 예시: enemy.ChangeState(new EnemyAttackState(enemy)); 
-                    Debug.Log("대상이 공격 각도 범위 안에 들어왔습니다! 공격 상태로 전환해야 합니다."); // 임시 로그
-
-                    // TODO: 여기에 실제 EnemyAttackState로 전환하는 코드를 넣으세요.
+                    
                     enemy.ChangeState(new EnemyAttackState(enemy,col));
                     return; // Update 함수를 즉시 종료하고 다음 프레임에 새로운 상태의 Update 실행
                 }
@@ -88,15 +86,16 @@ public class EnemyChaseState : EnemyState
         {
             // 대상의 위치
             Vector3 targetPosition = col.transform.position;
-
+            
             // 적 위치에서 대상까지 시야 차단이 없는지 확인
             if (!Physics.Linecast(enemy.transform.position, targetPosition, out RaycastHit hit, obstacleLayer))
             {
                 // 시야 확보됨: 플레이어 발견!
                 playerDetectedBroadly = true; // 감지 플래그 설정
                 time = 2f; // 마지막 감지 시간 초기화
-                agent.SetDestination(targetPosition); // 플레이어 위치로 목적지 설정
-                detectedPosition = targetPosition; // 마지막 감지 위치 갱신
+                agent.SetDestination(col.gameObject.transform.position); // 플레이어 위치로 목적지 설정
+                 // 마지막 감지 위치 갱신
+                detectedPosition = targetPosition;
                 // 이 루프는 여러 대상이 있을 수 있지만, 추적은 한 대상을 향해 하므로 여기서는 break 하지 않습니다.
                 // 가장 가까운 대상 등 우선순위 로직을 추가할 수도 있습니다.
                 break; // 첫 번째 시야 확보된 대상에게만 반응하도록 break
@@ -107,6 +106,7 @@ public class EnemyChaseState : EnemyState
         if (!playerDetectedBroadly)
         {
             // 마지막으로 감지했던 위치로 이동 (Enter에서 이미 설정됨)
+            agent.SetDestination(detectedPosition);
             // detectedPosition으로 이동 중이거나 이미 도달한 상태
             if (agent.remainingDistance <= agent.stoppingDistance)
             {
@@ -121,11 +121,6 @@ public class EnemyChaseState : EnemyState
             }
             // 만약 detectedPosition으로 가는 도중이라면 계속 그곳으로 이동합니다.
         }
-        // === 추적 로직 끝 ===
-
-        // 디버깅용 로그 (필요에 따라 주석 처리)
-        // Debug.Log("적 상태 : " + currentState + ", 남은 거리: " + agent.remainingDistance.ToString("F2") + ", 시간: " + time.ToString("F2"));
+        
     }
-
-    // Exit 시 NavMeshAgent를 멈추거나 다른 정리 작업 수행
 }

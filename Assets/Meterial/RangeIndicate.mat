@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: RangeIndicate
-  m_Shader: {fileID: 4800000, guid: a176945d0e562084691bce8e11084c6a, type: 3}
+  m_Shader: {fileID: 4800000, guid: b8b7ec5e5ea7e544f9f128f5800b06b7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
