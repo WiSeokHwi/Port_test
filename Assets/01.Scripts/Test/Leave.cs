@@ -1,20 +1,21 @@
 using UnityEngine;
 
-public class Arrive : AgentBehaviour
+public class Leave : AgentBehaviour
 {
-    public float targetRadius;
-    public float slowRadius;
+    public float escapeRadius;
+    public float dangerRadius;
     public float timeToTarget = 0.1f;
 
     public override Steering GetSteering()
     {
         Steering steering = new Steering();
-        Vector3 direction = target.transform.position - transform.position;
+        Vector3 direction = transform.position - target.transform.position;
         float distance = direction.magnitude;
-        float targetSpeed;
-        if (distance < targetRadius) return steering;
-        if (distance > slowRadius) targetSpeed = agent.maxSpeed;
-        else targetSpeed = agent.maxSpeed * distance / slowRadius;
+        if (distance > dangerRadius) return steering;
+        float reduce;
+        if (distance < escapeRadius) reduce = 0f;
+        else reduce = distance / escapeRadius * agent.maxSpeed;
+        float targetSpeed = agent.maxSpeed - reduce;
         
         // 키값을 설정하여 최대 속도에 맞춰 값을 제한하는 코드
         Vector3 desiredVelocity = direction;
