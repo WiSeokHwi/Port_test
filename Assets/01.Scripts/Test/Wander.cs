@@ -18,9 +18,9 @@ public class Wander : Face
         Steering steering = new Steering();
         float wanderOrientation = Random.Range(-1.0f, 1.0f) * rate;
         float targetOrientation = wanderOrientation + agent.orientation;
-        Vector3 orientationVec = OriToVec(agent.orientation);
+        Vector3 orientationVec = agent.OriToVec(agent.orientation);
         Vector3 targetPosition = (offset * orientationVec) + transform.position;
-        targetPosition = targetPosition + (OriToVec (targetOrientation) * radius);
+        targetPosition = targetPosition + (agent.OriToVec (targetOrientation) * radius);
         targetAux.transform.position = targetPosition;
         steering = base.GetSteering();
         steering.linear = targetAux.transform.position - transform.position;
@@ -28,9 +28,5 @@ public class Wander : Face
         steering.linear *= agent.maxAccel;
         return steering;
     }
-
-    public Vector3 OriToVec(float position)
-    {
-        return Vector3.zero;
-    }
+    
 }
