@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Seek : AgentBehaviour
+public class Seek : AgentBehaviour //목표를 찾는 행위
 {
     public override Steering GetSteering()
     {

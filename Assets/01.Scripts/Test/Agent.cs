@@ -91,8 +91,8 @@ public class Agent : MonoBehaviour
     }
     
 
-    public void SetSteering(Steering steering)
+    public void SetSteering(Steering steering) //새로운 Steering으로 변경하는 함수
     {
-        this.steering = steering;
+        this.steering = steering; // steering을 받아와 Agent.steering에 대입
     }
 }
