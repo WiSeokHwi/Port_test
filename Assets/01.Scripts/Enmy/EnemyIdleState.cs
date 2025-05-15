@@ -15,13 +15,31 @@ public class EnemyIdleState : EnemyState
         agent.isStopped = false;
         getTarget = Vector3.zero;
         enemy.SetTarget(enemy.HomePosition);
-        agent.SetDestination(enemy.Target);
+        agent.SetDestination(enemy.Target.transform.position);
         agent.speed = enemy.walkSpeed;
         cloakingCheckAmount = enemy.cloakingCheckAmount;
 
     }
 
     public override void Update()
+    {
+        DrawDetectionRays();
+        ChangeCheckState();
+        // 도착지점에 도달했을 때
+        if (agent.remainingDistance <= agent.stoppingDistance)
+        {
+            float waitTime = 2f;
+            
+            timer += Time.deltaTime;
+            
+            if (timer >= waitTime)
+            {
+                WanderPosLoop();
+            }
+        }
+    }
+
+    public void ChangeCheckState()
     {
         foreach (GameObject target in targets)
         {
@@ -39,42 +57,61 @@ public class EnemyIdleState : EnemyState
                 
                 // 앵글 계산
                 float angle = Vector3.Angle(foward, dirToTarget);
+                
                 if (angle <= enemy.checkAngle * 0.5f)
                 {
-                    // 오프셋을 적용한 방향으로 Raycast
-                    RaycastHit hit;
-
-                    // 방향 벡터에 오프셋을 동시에 적용한 방향
-                    Vector3 leftOffsetDirection = Quaternion.Euler(0, -enemy.checkOffsetAmount, 0) * dirToTarget;
-                    Vector3 rightOffsetDirection = Quaternion.Euler(0, enemy.checkOffsetAmount, 0) * dirToTarget;
-
-                    // 좌측과 우측 오프셋 범위 내에서 장애물이 있는지 한 번에 체크
-                    if (!Physics.Raycast(enemy.transform.position, leftOffsetDirection, out hit, enemy.checkRadius, layerMask) &&
-                        !Physics.Raycast(enemy.transform.position, rightOffsetDirection, out hit, enemy.checkRadius, layerMask))
+                    //  -offsetAmount부터 +offsetAmount까지, 일정 간격으로 체크
+                    int offsetChecks = 5; // 체크할 횟수 (숫자가 클수록 촘촘)
+                
+                    for (int i = 0; i <= offsetChecks; i++)
                     {
+                        // -offsetAmount부터 +offsetAmount까지 균등 분포
+                        float lerpFactor = (float)i / offsetChecks; // 0 ~ 1 사이
+                        float offsetAngle = Mathf.Lerp(-enemy.checkOffsetAmount, enemy.checkOffsetAmount, lerpFactor); // a, b 를 c (0~1) 값을 비율로
+
+                        Vector3 offsetDirection = Quaternion.Euler(0, offsetAngle, 0) * dirToTarget; // 
                         
+                        
+                        
+                        RaycastHit hit;
+                        
+                        if (!Physics.Raycast(enemy.transform.position, offsetDirection, out hit, enemy.checkRadius, layerMask))
+                        {
+                            enemy.SetTarget(target);
+                            enemy.ChangeState(new EnemyCheckState(enemy));
+                        }
                     }
                 }
             }
         }
-        
-        // 도착지점에 도달했을 때
-        if (agent.remainingDistance <= agent.stoppingDistance)
-        {
-            float waitTime = 2f;
-            
-            timer += Time.deltaTime;
-            
-            if (timer >= waitTime)
-            {
-                WanderPosLoop();
-            }
-        }
     }
-
-    void ChaingeCheckState()
+    private void DrawDetectionRays()
     {
+        int rayCount = 20; // 부채꼴의 세밀함 (숫자가 클수록 촘촘함)
+        float halfAngle = enemy.checkAngle * 0.5f;
+        Vector3 forward = enemy.transform.forward;
+
+        for (int i = 0; i <= rayCount; i++)
+        {
+            float lerp = (float)i / rayCount;
+            float currentAngle = Mathf.Lerp(-halfAngle, halfAngle, lerp);
+
+            Vector3 direction = Quaternion.Euler(0, currentAngle, 0) * forward;
+
+            Debug.DrawRay(enemy.transform.position, direction * enemy.checkRadius, Color.yellow);
+        }
         
+        int offsetChecks = 5;
+
+        for (int i = 0; i <= offsetChecks; i++)
+        {
+            float lerpFactor = (float)i / offsetChecks;
+            float offsetAngle = Mathf.Lerp(-enemy.checkOffsetAmount, enemy.checkOffsetAmount, lerpFactor);
+
+            Vector3 offsetDirection = Quaternion.Euler(0, offsetAngle, 0) * forward;
+
+            Debug.DrawRay(enemy.transform.position, offsetDirection * enemy.checkRadius, Color.green);
+        }
     }
     void WanderPosLoop()
     {
@@ -90,8 +127,8 @@ public class EnemyIdleState : EnemyState
             }
 
             // 새로운 타겟 설정
-            enemy.SetTarget(enemy.waypoints[pathIndex].transform.position);
-            agent.SetDestination(enemy.Target);
+            enemy.SetTarget(enemy.waypoints[pathIndex]);
+            agent.SetDestination(enemy.Target.transform.position);
             timer = 0f;
     }
 }

@@ -1,23 +1,20 @@
-
 using UnityEngine;
-
 
 
 public class EnemySensor : MonoBehaviour
 {
     private EnemyController enemyController;
-    
+
     private float checkRadius; // 감지 범위
     private float checkAngle; // 감지 각도
     private float offsetAmount; // Raycast에 추가할 오프셋 크기
-    
+
     public LayerMask detectionLayer; // 감지할 레이어
     public LayerMask obstacleLayer; // 장애물 레이어 (벽 등)
 
     private void Awake()
     {
         enemyController = GetComponentInParent<EnemyController>();
-        
     }
 
 
@@ -28,6 +25,7 @@ public class EnemySensor : MonoBehaviour
         {
             enemyController = GetComponentInParent<EnemyController>();
         }
+
         checkRadius = enemyController.checkRadius;
         checkAngle = enemyController.checkAngle;
         offsetAmount = enemyController.checkOffsetAmount;
@@ -36,26 +34,29 @@ public class EnemySensor : MonoBehaviour
 
         foreach (Collider col in detectedColliders)
         {
-            Vector3 directionToTarget = col.transform.position - transform.position;
+            Vector3  directionToTarget = col.transform.position - transform.position;
             directionToTarget.y = 0; // y축으로 계산을 안하도록 설정 (2D 평면에서만 검사)
 
             // 감지 각도 내에 있는지 확인
             if (Vector3.Angle(transform.forward, directionToTarget) <= checkAngle / 2)
             {
-                // 오프셋을 적용한 방향으로 Raycast
-                RaycastHit hit;
+                //  -offsetAmount부터 +offsetAmount까지, 일정 간격으로 체크
+                int offsetChecks = 5; // 체크할 횟수 (숫자가 클수록 촘촘)
 
-                // 방향 벡터에 오프셋을 동시에 적용한 방향
-                Vector3 leftOffsetDirection = Quaternion.Euler(0, -offsetAmount, 0) * directionToTarget;
-                Vector3 rightOffsetDirection = Quaternion.Euler(0, offsetAmount, 0) * directionToTarget;
-
-                // 좌측과 우측 오프셋 범위 내에서 장애물이 있는지 한 번에 체크
-                if (!Physics.Raycast(transform.position, leftOffsetDirection, out hit, checkRadius, obstacleLayer) &&
-                    !Physics.Raycast(transform.position, rightOffsetDirection, out hit, checkRadius, obstacleLayer))
+                for (int i = 0; i <= offsetChecks; i++)
                 {
-                    // 장애물이 없다면 적을 감지
-                    
-                    return col.transform.position;
+                    // -offsetAmount부터 +offsetAmount까지 균등 분포
+                    float lerpFactor = (float)i / offsetChecks; // 0 ~ 1 사이
+                    float angle = Mathf.Lerp(-offsetAmount, offsetAmount, lerpFactor); // 
+
+                    Vector3 offsetDirection = Quaternion.Euler(0, angle, 0) * directionToTarget;
+
+                    RaycastHit hit;
+                    if (!Physics.Raycast(transform.position, offsetDirection, out hit, checkRadius, obstacleLayer))
+                    {
+                        // 장애물 없는 방향에서 적 감지됨
+                        return col.transform.position;
+                    }
                 }
             }
         }
@@ -81,10 +82,10 @@ public class EnemySensor : MonoBehaviour
 
             // 좌측 오프셋 시각화 (detectedTarget 기준)
             Gizmos.color = Color.blue;
-            Gizmos.DrawLine(transform.position,transform.position + leftOffsetDirection);
+            Gizmos.DrawLine(transform.position, transform.position + leftOffsetDirection);
 
             // 우측 오프셋 시각화 (detectedTarget 기준)
-            Gizmos.DrawLine(transform.position,transform.position + rightOffsetDirection);
+            Gizmos.DrawLine(transform.position, transform.position + rightOffsetDirection);
         }
 
         // 부채꼴 모양의 시각화

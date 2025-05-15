@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI; // NavMeshAgent 사용을 위해 필수
@@ -10,8 +11,8 @@ public class EnemyController : MonoBehaviour
     private EnemyState currentState { get; set; } 
     
     // 최종 목표 지점 (회전 로직 중 실제 목표 지점을 저장하기 위해 사용)
-    [SerializeField] private Vector3 target; 
-    public Vector3 Target => target; // 외부에서 읽기 전용으로 접근 가능하도록 프로퍼티 설정
+    [SerializeField] private GameObject target; 
+    public GameObject Target => target; // 외부에서 읽기 전용으로 접근 가능하도록 프로퍼티 설정
     
     public GameObject[] targets;
 
@@ -23,11 +24,11 @@ public class EnemyController : MonoBehaviour
     public NavMeshAgent Agent => agent; // 외부 접근용 프로퍼티
 
     // 몬스터의 초기 위치 또는 복귀 지점
-    [SerializeField] private Transform homePosition; 
-    public Vector3 HomePosition => homePosition.position; // 외부 접근용 프로퍼티
+    [SerializeField] private GameObject homePosition; 
+    public GameObject HomePosition => homePosition; // 외부 접근용 프로퍼티
     
     // 순찰 경로 지점들 (필요시 사용)
-    public Transform[] waypoints; 
+    public GameObject[] waypoints; 
     
     // 새로 만든 시각화 관리 스크립트 참조
     [SerializeField] private AttackConeVisualizer attackConeVisualizer;
@@ -79,7 +80,7 @@ public class EnemyController : MonoBehaviour
     void Update()
     {
         
-        TurnRound();
+        //TurnRound();
         SpeedAnimation();
         
         // 현재 상태(currentState)의 Update 로직 실행
@@ -110,7 +111,7 @@ public class EnemyController : MonoBehaviour
     // 외부에서 목표 지점을 설정하는 함수 (현재 코드에서는 직접 사용되지 않는 듯 보임)
     // 회전 로직은 Agent.destination을 기준으로 동작하고, 회전 시작 시점에 target 변수에 백업함.
     // 이 함수가 필요한 경우는 상태 변경 시 목표를 명시적으로 지정할 때일 수 있음.
-    public void SetTarget(Vector3 newTarget)
+    public void SetTarget(GameObject newTarget)
     {
         target = newTarget;
     }
@@ -145,7 +146,7 @@ public class EnemyController : MonoBehaviour
     }
     
 
-    private void TurnRound()
+    /*private void TurnRound()
     {
         // --- 회전 로직 시작 ---
     
@@ -250,7 +251,7 @@ public class EnemyController : MonoBehaviour
 
         // 최종적으로 계산되고 검증된 중간 경유지 위치 반환
         return targetPos;
-    }
+    }*/
 
     private void SpeedAnimation()
     {
@@ -326,4 +327,5 @@ public class EnemyController : MonoBehaviour
         }
         // === 공격 범위 및 각도 시각화 끝 ===
     }
+
 }

@@ -8,26 +8,19 @@ public class EnemyCheckState : EnemyState
     private LayerMask detectionLayer = LayerMask.GetMask("Player");
     private LayerMask obstacleLayer = LayerMask.GetMask("Obstacle");
     private float detectionRadius;
-    private Vector3 getTarget;
-
+    private LayerMask obstacleLayerMask = LayerMask.GetMask("Obstacle");
     public override void Enter()
     {
         base.Enter();
-        agent.SetDestination(enemy.Target);
+        agent.SetDestination(enemy.Target.transform.position);
         agent.speed = enemy.walkSpeed;
         detectionRadius = enemy.detectionRadius;
     }
 
     public override void Update()
     {
-        getTarget = enemy.enenmySensor.DetectEnemies();
-        Debug.Log("타겟 : " + getTarget);
-        if (getTarget != Vector3.zero)
-        {
-            enemy.SetTarget(getTarget);
-            agent.SetDestination(enemy.Target);
-        }
-        
+        ChangeCheckState();
+        ChangeChasingState();
         // agent가 도착했는지 체크
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
@@ -39,25 +32,65 @@ public class EnemyCheckState : EnemyState
                 enemy.ChangeState(new EnemyIdleState(enemy));
             }
         }
-         Collider[] detectedColliders = Physics.OverlapSphere(enemy.transform.position, detectionRadius, detectionLayer);
-
-         foreach (Collider col in detectedColliders)
-         {
-             if (!Physics.Linecast(enemy.transform.position, col.transform.position, out RaycastHit hit, obstacleLayer))
-             {
-                 enemy.ChangeState(new EnemyChaseState(enemy));
-             }
-         }
+        
+        
         
     }
-
-    
-
     public override void Exit()
     {
         base.Exit();
         timer = 0;
     }
 
-    
+    public void ChangeCheckState()
+    {
+        foreach (GameObject target in targets)
+        {
+            // 타겟과 자신사이의 거리를 구함
+            float distance = Vector3.Distance(target.transform.position, enemy.transform.position);
+
+            if (distance <= enemy.checkRadius) //체크거리보다 distance가 작다면(영역내로 들어왔다면)
+            {
+                // 타겟 방향 구하기
+                Vector3 dirToTarget = target.transform.position - enemy.transform.position;
+                dirToTarget.Normalize(); // 방향만 가져오기
+
+                // 자신이 바라보는 방향
+                Vector3 foward = enemy.transform.forward;
+
+                // 앵글 계산
+                float angle = Vector3.Angle(foward, dirToTarget);
+
+                if (angle <= enemy.checkAngle * 0.5f)
+                {
+                    
+                    RaycastHit hit;
+
+                    if (!Physics.Raycast(enemy.transform.position, target.transform.position, out hit, enemy.checkRadius,
+                            obstacleLayerMask))
+                    {
+                        Debug.DrawRay(enemy.transform.position, target.transform.position * enemy.checkRadius, Color.red);
+                        enemy.SetTarget(target);
+                        agent.SetDestination(enemy.Target.transform.position);
+                    }
+
+                }
+            }
+        }
+    }
+
+    public void ChangeChasingState()
+    {
+        foreach (GameObject target in enemy.targets)
+        {
+            // 타겟과 자신사이의 거리를 구함
+            float distance = Vector3.Distance(target.transform.position, enemy.transform.position);
+
+            if (distance <= enemy.detectionRadius) //체크거리보다 distance가 작다면(영역내로 들어왔다면)
+            {
+                enemy.SetTarget(target);
+                enemy.ChangeState(new EnemyChaseState(enemy));
+            }
+        }
+    }
 }

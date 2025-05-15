@@ -15,15 +15,13 @@ public class EnemyChaseState : EnemyState
     private float attackRange;
     private float attackAngle;
 
-    private Vector3 detectedPosition;
+    
     private float time;
 
     public override void Enter()
     {
         base.Enter();
         agent.speed = enemy.runSpeed; // 뛰는 속도로 설정
-        detectedPosition = enemy.Target;
-
         // EnemyController에서 설정 값 가져오기
         detectionRadius = enemy.detectionRadius;
         // EnemyController에 이 변수들이 있어야 합니다.
@@ -35,17 +33,15 @@ public class EnemyChaseState : EnemyState
         time = 2f; // 마지막 감지 후 추격 유지 시간
 
         // Enter 시점에서 현재 Agent의 목적지를 detectedPosition으로 설정
-        agent.SetDestination(detectedPosition);
+        agent.SetDestination(enemy.Target.transform.position);
     }
 
     public override void Update()
     {
-        // 넓은 범위 감지 (추적 대상 확인용)
-        Collider[] detectedColliders = Physics.OverlapSphere(enemy.transform.position, detectionRadius, detectionLayer);
-
         // 공격 범위 감지
         Collider[] attackColliders = Physics.OverlapSphere(enemy.transform.position, attackRange, detectionLayer);
-
+        
+        
         // === 공격 가능 대상 확인 및 상태 전환 로직 ===
         // 공격 범위 안에 있는 대상들을 순회하며
         foreach (Collider col in attackColliders)
@@ -76,31 +72,37 @@ public class EnemyChaseState : EnemyState
             }
         }
         // === 공격 가능 대상 확인 로직 끝 ===
+        
+        foreach (GameObject target in enemy.targets)
+        {
+            // 타겟과 자신사이의 거리를 구함
+            float distance = Vector3.Distance(target.transform.position, enemy.transform.position);
+
+            if (distance <= enemy.detectionRadius) //체크거리보다 distance가 작다면(영역내로 들어왔다면)
+            {
+                RaycastHit hit;
+                
+                if (!Physics.Raycast(enemy.transform.position, target.transform.position, out hit, enemy.checkRadius, // 나와 플레이어 사이에 장애물이 없다면
+                        obstacleLayer))
+                {
+                    Debug.DrawRay(enemy.transform.position, target.transform.position * enemy.checkRadius, Color.red);
+                    enemy.SetTarget(target);
+                    agent.SetDestination(enemy.Target.transform.position);
+                }
+            }
+            else
+            {
+                
+            }
+        }
+        
+
+        
+        
 
 
         // === 추적 로직 (공격 가능 대상이 없을 때 실행) ===
         bool playerDetectedBroadly = false; // 넓은 범위 감지 여부 플래그
-
-        // 넓은 범위 감지 콜라이더 순회 (추적 대상의 시야 확보 확인)
-        foreach (Collider col in detectedColliders)
-        {
-            // 대상의 위치
-            Vector3 targetPosition = col.transform.position;
-            
-            // 적 위치에서 대상까지 시야 차단이 없는지 확인
-            if (!Physics.Linecast(enemy.transform.position, targetPosition, out RaycastHit hit, obstacleLayer))
-            {
-                // 시야 확보됨: 플레이어 발견!
-                playerDetectedBroadly = true; // 감지 플래그 설정
-                time = 2f; // 마지막 감지 시간 초기화
-                agent.SetDestination(col.gameObject.transform.position); // 플레이어 위치로 목적지 설정
-                 // 마지막 감지 위치 갱신
-                detectedPosition = targetPosition;
-                // 이 루프는 여러 대상이 있을 수 있지만, 추적은 한 대상을 향해 하므로 여기서는 break 하지 않습니다.
-                // 가장 가까운 대상 등 우선순위 로직을 추가할 수도 있습니다.
-                break; // 첫 번째 시야 확보된 대상에게만 반응하도록 break
-            }
-        }
 
         // 넓은 범위에서 플레이어가 시야 확보되지 않았을 경우 (또는 detectedColliders가 비어있을 경우)
         if (!playerDetectedBroadly)
@@ -123,4 +125,5 @@ public class EnemyChaseState : EnemyState
         }
         
     }
+    
 }
