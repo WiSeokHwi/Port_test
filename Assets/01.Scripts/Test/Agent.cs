@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Agent : MonoBehaviour
+public class Agent : MonoBehaviour // 지능적인 움직임을 만들기 위한 행위들을 활용
 {
     public float maxSpeed; // 최대 속도
     public float maxAccel; // 최대 가속도 (부드러운 움직임을 위해)

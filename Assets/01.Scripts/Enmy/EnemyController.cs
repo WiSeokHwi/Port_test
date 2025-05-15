@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI; // NavMeshAgent 사용을 위해 필수
 
@@ -11,6 +12,8 @@ public class EnemyController : MonoBehaviour
     // 최종 목표 지점 (회전 로직 중 실제 목표 지점을 저장하기 위해 사용)
     [SerializeField] private Vector3 target; 
     public Vector3 Target => target; // 외부에서 읽기 전용으로 접근 가능하도록 프로퍼티 설정
+    
+    public GameObject[] targets;
 
     // 회전 시 사용할 중간 경유 지점 (턴 포인트)
     private Vector3 d1;       
@@ -22,9 +25,6 @@ public class EnemyController : MonoBehaviour
     // 몬스터의 초기 위치 또는 복귀 지점
     [SerializeField] private Transform homePosition; 
     public Vector3 HomePosition => homePosition.position; // 외부 접근용 프로퍼티
-
-    // 적 감지 로직을 담당하는 센서 컴포넌트 (별도 스크립트로 추정)
-    public EnemySensor enenmySensor; 
     
     // 순찰 경로 지점들 (필요시 사용)
     public Transform[] waypoints; 
@@ -34,12 +34,12 @@ public class EnemyController : MonoBehaviour
 
     // === AI 설정값들 (Inspector에서 조절 가능) ===
     public float detectionRadius = 6f; // 적 감지 반경
-    public float checkRadius = 8f;     // (사용처 불분명, EnemySensor에서 사용할 가능성)
-    public float checkAngle = 30f;     // (사용처 불분명, EnemySensor에서 사용할 가능성)
-    public float checkOffsetAmount = 0.5f; // (사용처 불분명, EnemySensor에서 사용할 가능성)
-    public float cloakingCheckAmount = 3f; // (사용처 불분명, 은신 감지 등에 사용할 가능성)
-    public float attackRange = 1.5f;
-    public float attackAngle = 80f;
+    public float checkRadius = 8f;     // 적 체크(?) 반경
+    public float checkAngle = 30f;     // 적 체크 앵글
+    public float checkOffsetAmount = 0.5f; // 장애물 체크할 오프셋
+    public float cloakingCheckAmount = 3f; // 너무 가까이 왔을때 cloaking이 아니라면 감지할 반경
+    public float attackRange = 1.5f; // 공격 시전 범위
+    public float attackAngle = 80f; // 공격 앵글
     
     
     public float walkSpeed = 1.2f;     // 걷기 속도 (애니메이션 제어용)
@@ -58,18 +58,8 @@ public class EnemyController : MonoBehaviour
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>(); // NavMeshAgent 컴포넌트 가져오기
-        enenmySensor = GetComponentInChildren<EnemySensor>(); // 자식 오브젝트에서 EnemySensor 컴포넌트 가져오기
         animator = GetComponent<Animator>(); // Animator 컴포넌트 가져오기
-        
-        if (attackConeVisualizer == null)
-        {
-            attackConeVisualizer = GetComponentInChildren<AttackConeVisualizer>();
-            if (attackConeVisualizer == null)
-            {
-                Debug.LogError("AttackConeVisualizer component not found! Assign it in the Inspector or ensure it's a child.");
-                enabled = false; // 시각화 없으면 스크립트 비활성화 등 에러 처리return;
-            }
-        }
+        targets = GameObject.FindGameObjectsWithTag("Player"); // targets 에 Player를 다 담기
     }
     
     // 초기 상태 설정 (첫 프레임 업데이트 전 1회 호출)
@@ -88,41 +78,10 @@ public class EnemyController : MonoBehaviour
     // 매 프레임 호출 (주요 로직 업데이트)
     void Update()
     {
-        if (attackConeVisualizer != null)
-        {
-            attackConeVisualizer.EnemyPosition = transform.position;
-            attackConeVisualizer.EnemyForward = transform.forward;
-            attackConeVisualizer.AttackRange = attackRange;
-            attackConeVisualizer.AttackAngle = attackAngle;
-            // AttackConeVisualizer의 Update 함수가 자동으로 실행되면서 메쉬 업데이트 및 셰이더 변수 전달
-        }
         
         TurnRound();
-
-        // --- 애니메이션 속도 제어 로직 ---
-        float speedPercent ; // 애니메이터에 전달할 속도 비율 (0:정지, 0.5:걷기 최대, 1:뛰기 최대)
+        SpeedAnimation();
         
-        // 현재 NavMeshAgent의 속도(Agent.velocity.magnitude)가 걷기 속도(walkSpeed) 이하라면
-        if (Agent.velocity.magnitude <= walkSpeed)
-        {
-            // 현재 속도를 0 ~ walkSpeed 범위에서 0 ~ 0.5 범위로 변환 (정규화 후 0.5 곱하기)
-            // Mathf.InverseLerp(min, max, value): value가 min일 때 0, max일 때 1을 반환
-            speedPercent = Mathf.InverseLerp(0f, walkSpeed, Agent.velocity.magnitude) * 0.5f;
-        }
-        else // 현재 속도가 걷기 속도보다 빠르다면 (뛰는 중)
-        {
-            // 현재 속도를 walkSpeed ~ runSpeed 범위에서 0.5 ~ 1.0 범위로 변환
-            // (walkSpeed일 때 0, runSpeed일 때 1로 정규화한 값에 0.5를 더함)
-            speedPercent = 0.5f + Mathf.InverseLerp(walkSpeed, runSpeed, Agent.velocity.magnitude) * 0.5f;
-        }
-
-        // Animator의 "MoveSpeed" 파라미터 값을 계산된 speedPercent로 설정
-        // 0.1f: 값 변경 시 부드럽게 전환되는 시간 (Damp Time)
-        // Time.deltaTime: 프레임 간 시간 간격 (프레임 속도에 관계없이 일정한 속도로 값 변경)
-        animator.SetFloat("MoveSpeed", speedPercent, 0.1f, Time.deltaTime);
-        
-        // --- 애니메이션 속도 제어 로직 끝 ---
-
         // 현재 상태(currentState)의 Update 로직 실행
         currentState.Update();
         
@@ -155,6 +114,7 @@ public class EnemyController : MonoBehaviour
     {
         target = newTarget;
     }
+    
     public void OnAttackHitCheck()
     {
         LayerMask playerLayer = LayerMask.GetMask("Player");
@@ -290,6 +250,33 @@ public class EnemyController : MonoBehaviour
 
         // 최종적으로 계산되고 검증된 중간 경유지 위치 반환
         return targetPos;
+    }
+
+    private void SpeedAnimation()
+    {
+        // --- 애니메이션 속도 제어 로직 ---
+        float speedPercent ; // 애니메이터에 전달할 속도 비율 (0:정지, 0.5:걷기 최대, 1:뛰기 최대)
+        
+        // 현재 NavMeshAgent의 속도(Agent.velocity.magnitude)가 걷기 속도(walkSpeed) 이하라면
+        if (Agent.velocity.magnitude <= walkSpeed)
+        {
+            // 현재 속도를 0 ~ walkSpeed 범위에서 0 ~ 0.5 범위로 변환 (정규화 후 0.5 곱하기)
+            // Mathf.InverseLerp(min, max, value): value가 min일 때 0, max일 때 1을 반환
+            speedPercent = Mathf.InverseLerp(0f, walkSpeed, Agent.velocity.magnitude) * 0.5f;
+        }
+        else // 현재 속도가 걷기 속도보다 빠르다면 (뛰는 중)
+        {
+            // 현재 속도를 walkSpeed ~ runSpeed 범위에서 0.5 ~ 1.0 범위로 변환
+            // (walkSpeed일 때 0, runSpeed일 때 1로 정규화한 값에 0.5를 더함)
+            speedPercent = 0.5f + Mathf.InverseLerp(walkSpeed, runSpeed, Agent.velocity.magnitude) * 0.5f;
+        }
+
+        // Animator의 "MoveSpeed" 파라미터 값을 계산된 speedPercent로 설정
+        // 0.1f: 값 변경 시 부드럽게 전환되는 시간 (Damp Time)
+        // Time.deltaTime: 프레임 간 시간 간격 (프레임 속도에 관계없이 일정한 속도로 값 변경)
+        animator.SetFloat("MoveSpeed", speedPercent, 0.1f, Time.deltaTime);
+        
+        // --- 애니메이션 속도 제어 로직 끝 ---
     }
 
     // Scene 뷰에서 Gizmo를 그리는 함수 (디버깅 및 시각화 목적)
