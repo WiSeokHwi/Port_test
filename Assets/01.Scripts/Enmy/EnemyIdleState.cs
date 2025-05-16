@@ -13,7 +13,6 @@ public class EnemyIdleState : EnemyState
     {
         base.Enter(); 
         agent.isStopped = false;
-        getTarget = Vector3.zero;
         enemy.SetTarget(enemy.HomePosition);
         agent.SetDestination(enemy.Target.transform.position);
         agent.speed = enemy.walkSpeed;

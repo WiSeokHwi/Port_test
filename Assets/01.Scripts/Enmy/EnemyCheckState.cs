@@ -5,16 +5,13 @@ public class EnemyCheckState : EnemyState
     public EnemyCheckState(EnemyController enemy) : base(enemy) {}
     private float timer = 0;
     private float waitTime = 1.5f;
-    private LayerMask detectionLayer = LayerMask.GetMask("Player");
-    private LayerMask obstacleLayer = LayerMask.GetMask("Obstacle");
-    private float detectionRadius;
     private LayerMask obstacleLayerMask = LayerMask.GetMask("Obstacle");
+    
     public override void Enter()
     {
         base.Enter();
         agent.SetDestination(enemy.Target.transform.position);
         agent.speed = enemy.walkSpeed;
-        detectionRadius = enemy.detectionRadius;
     }
 
     public override void Update()

@@ -6,23 +6,12 @@ public class EnemyAttackState : EnemyState
     private GameObject attackTarget; 
 
     // 생성자: EnemyController와 함께 공격 대상 콜라이더를 매개변수로 받음
-    public EnemyAttackState(EnemyController enemy, Collider targetCollider) : base(enemy) 
-    {
-        // 받은 콜라이더의 Transform을 attackTarget 변수에 저장
-        if (targetCollider)
-        {
-            this.attackTarget = targetCollider.gameObject;
-        }
-        else
-        {
-            enemy.ChangeState(new EnemyChaseState(enemy));
-        }
-    }
+    public EnemyAttackState(EnemyController enemy) : base(enemy) {}
 
     public override void Enter()
     {
         enemy.Agent.isStopped = true;
-        enemy.animator.SetTrigger("Attack");
+        enemy.attack.Attack(0);
     }
     
 }

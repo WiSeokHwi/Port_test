@@ -33,6 +33,9 @@ public class EnemyController : MonoBehaviour
     // 새로 만든 시각화 관리 스크립트 참조
     [SerializeField] private AttackConeVisualizer attackConeVisualizer;
 
+    public AttackSetting attack; // 공격 시전
+     
+
     // === AI 설정값들 (Inspector에서 조절 가능) ===
     public float detectionRadius = 6f; // 적 감지 반경
     public float checkRadius = 8f;     // 적 체크(?) 반경
@@ -61,6 +64,7 @@ public class EnemyController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>(); // NavMeshAgent 컴포넌트 가져오기
         animator = GetComponent<Animator>(); // Animator 컴포넌트 가져오기
         targets = GameObject.FindGameObjectsWithTag("Player"); // targets 에 Player를 다 담기
+        attack = GetComponent<AttackSetting>();
     }
     
     // 초기 상태 설정 (첫 프레임 업데이트 전 1회 호출)
@@ -107,45 +111,21 @@ public class EnemyController : MonoBehaviour
         // 새로운 상태의 Enter 로직 호출 (상태 시작 시 초기화 작업)
         currentState.Enter(); 
     }
-
+    
     // 외부에서 목표 지점을 설정하는 함수 (현재 코드에서는 직접 사용되지 않는 듯 보임)
-    // 회전 로직은 Agent.destination을 기준으로 동작하고, 회전 시작 시점에 target 변수에 백업함.
-    // 이 함수가 필요한 경우는 상태 변경 시 목표를 명시적으로 지정할 때일 수 있음.
     public void SetTarget(GameObject newTarget)
     {
         target = newTarget;
     }
     
-    public void OnAttackHitCheck()
-    {
-        LayerMask playerLayer = LayerMask.GetMask("Player");
-
-        Collider[] hitPlayers = Physics.OverlapSphere(transform.position, attackRange, playerLayer);
-
-        foreach (Collider player in hitPlayers)
-        {
-            Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
-            float angle = Vector3.Angle(transform.forward, directionToPlayer);
-
-            if (angle < attackAngle * 0.5f)
-            {
-                Debug.Log("플레이어 적중!");
-                // 여기서 플레이어에 데미지를 주기
-                //player.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage);
-            }
-        }
-    }
+    // 공격모션 종료
     public void OnAttackAnimationEnd()
     {
-        // 현재 상태가 EnemyAttackState인지 체크하고 처리
-        if (currentState is EnemyAttackState)
-        {
-            Agent.isStopped = false;
-            ChangeState(new EnemyChaseState(this));
-        }
+        Agent.isStopped = false;
+        ChangeState(new EnemyChaseState(this));
     }
     
-
+    //회전 로직
     /*private void TurnRound()
     {
         // --- 회전 로직 시작 ---
@@ -252,37 +232,47 @@ public class EnemyController : MonoBehaviour
         // 최종적으로 계산되고 검증된 중간 경유지 위치 반환
         return targetPos;
     }*/
+    
+    // 애니메이션 이동값 처리하는 매서드
 
     private void SpeedAnimation()
     {
-        // --- 애니메이션 속도 제어 로직 ---
-        float speedPercent ; // 애니메이터에 전달할 속도 비율 (0:정지, 0.5:걷기 최대, 1:뛰기 최대)
+        float speedPercent = 0; // 애니메이터에 전달할 속도 비율 (0:정지, 0.5:걷기 최대, 1:뛰기 최대)
+
+        float currentSpeed = Agent.velocity.magnitude; // 실제 이동 속도
+        float targetSpeed = Agent.speed;               // 목표 이동 속도 (걷기/뛰기 여부 판단용)
+        
+        
+        
         
         // 현재 NavMeshAgent의 속도(Agent.velocity.magnitude)가 걷기 속도(walkSpeed) 이하라면
-        if (Agent.velocity.magnitude <= walkSpeed)
+        
+        if (targetSpeed  > walkSpeed)
         {
-            // 현재 속도를 0 ~ walkSpeed 범위에서 0 ~ 0.5 범위로 변환 (정규화 후 0.5 곱하기)
-            // Mathf.InverseLerp(min, max, value): value가 min일 때 0, max일 때 1을 반환
-            speedPercent = Mathf.InverseLerp(0f, walkSpeed, Agent.velocity.magnitude) * 0.5f;
+            
+            // 걷기 속도(walkSpeed) ~ 뛰기 속도(runSpeed) 사이에서 정규화 후 0.5 추가
+            speedPercent = 0.5f + Mathf.InverseLerp(walkSpeed, runSpeed, currentSpeed) * 0.5f;
         }
-        else // 현재 속도가 걷기 속도보다 빠르다면 (뛰는 중)
+        else
         {
-            // 현재 속도를 walkSpeed ~ runSpeed 범위에서 0.5 ~ 1.0 범위로 변환
-            // (walkSpeed일 때 0, runSpeed일 때 1로 정규화한 값에 0.5를 더함)
-            speedPercent = 0.5f + Mathf.InverseLerp(walkSpeed, runSpeed, Agent.velocity.magnitude) * 0.5f;
+            // 정지 ~ 걷기 속도(walkSpeed) 사이에서 정규화 후 0.5 곱함
+            speedPercent = Mathf.InverseLerp(0f, walkSpeed, currentSpeed) * 0.5f;
         }
-
         // Animator의 "MoveSpeed" 파라미터 값을 계산된 speedPercent로 설정
         // 0.1f: 값 변경 시 부드럽게 전환되는 시간 (Damp Time)
         // Time.deltaTime: 프레임 간 시간 간격 (프레임 속도에 관계없이 일정한 속도로 값 변경)
         animator.SetFloat("MoveSpeed", speedPercent, 0.1f, Time.deltaTime);
         
-        // --- 애니메이션 속도 제어 로직 끝 ---
+
     }
 
     // Scene 뷰에서 Gizmo를 그리는 함수 (디버깅 및 시각화 목적)
     private void OnDrawGizmos()
     {
+        // 체크 반경(detectionRadius)을 Cyan 색상 원으로 표시
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, checkRadius);
+        
         // 감지 반경(detectionRadius)을 Cyan 색상 원으로 표시
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
@@ -290,6 +280,14 @@ public class EnemyController : MonoBehaviour
         // 은신 감지 반경(cloakingCheckAmount)을 Magenta 색상 원으로 표시
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, cloakingCheckAmount);
+        // corners 배열을 따라 선 그리기
+
+        Gizmos.color = Color.blue;
+        Vector3[] corners = agent.path.corners;
+        for (int i = 0; i < corners.Length - 1; i++)
+        {
+            Gizmos.DrawLine(corners[i], corners[i + 1]);
+        }
         
         // === 공격 범위 및 각도 시각화 ===
         if (attackRange > 0) // 공격 반경이 0보다 클 때만 그림
@@ -315,10 +313,7 @@ public class EnemyController : MonoBehaviour
                 // 적 위치에서 공격 반경 끝의 경계 방향까지 라인을 그립니다.
                 Gizmos.DrawLine(position, position + leftDirection * attackRange);
                 Gizmos.DrawLine(position, position + rightDirection * attackRange);
-
-                // 선택적으로, 공격 반경 끝에서 경계 라인 사이의 호를 그릴 수 있습니다.
-                // Gizmos.DrawWireArc 함수가 없으므로, 여러 개의 작은 라인을 이어붙이거나 생략합니다.
-                // 일반적으로 경계 라인 두 개와 원만 그려도 충분합니다.
+                
             }
             else if (attackAngle >= 180f)
             {

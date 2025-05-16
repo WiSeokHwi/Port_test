@@ -5,74 +5,59 @@ public class EnemyChaseState : EnemyState
     public EnemyChaseState(EnemyController enemy) : base(enemy)
     {
     }
-
-    private LayerMask detectionLayer = LayerMask.GetMask("Player");
+    
     private LayerMask obstacleLayer = LayerMask.GetMask("Obstacle");
-    private float detectionRadius;
+    
 
     // attackRange, attackAngle 변수는 EnemyController에서 가져와야 함
     // EnemyController에 attackRange, attackAngle 프로퍼티 또는 필드 필요
     private float attackRange;
     private float attackAngle;
+    
+    private Vector3 lastTargetPosition;
+    private Vector3 predictedPosition;
+    private Vector3 targetVelocity;
+    private bool isDetected;
 
     
     private float time;
 
     public override void Enter()
     {
-        base.Enter();
         agent.speed = enemy.runSpeed; // 뛰는 속도로 설정
-        // EnemyController에서 설정 값 가져오기
-        detectionRadius = enemy.detectionRadius;
-        // EnemyController에 이 변수들이 있어야 합니다.
-        // 예: public float attackRange = 2f;
-        // 예: public float attackAngle = 90f; // 예시 값 (총 90도 시야각)
         attackRange = enemy.attackRange;
         attackAngle = enemy.attackAngle;
-
+        isDetected = false; // 감지상태 초기화
+        
+        predictedPosition = enemy.Target.transform.position;
+        
         time = 2f; // 마지막 감지 후 추격 유지 시간
 
-        // Enter 시점에서 현재 Agent의 목적지를 detectedPosition으로 설정
-        agent.SetDestination(enemy.Target.transform.position);
+        if (enemy.Target != null)
+        {
+            lastTargetPosition = enemy.Target.transform.position;
+            agent.SetDestination(lastTargetPosition);
+        }
     }
 
     public override void Update()
     {
-        // 공격 범위 감지
-        Collider[] attackColliders = Physics.OverlapSphere(enemy.transform.position, attackRange, detectionLayer);
-        
-        
-        // === 공격 가능 대상 확인 및 상태 전환 로직 ===
-        // 공격 범위 안에 있는 대상들을 순회하며
-        foreach (Collider col in attackColliders)
+        if(enemy.Target) ChangeAttackState();
+        PredictedChase();
+    }
+
+    void ChangeAttackState()
+    {
+        float targetDis = Vector3.Distance(enemy.transform.position, enemy.Target.transform.position);
+
+        if (attackRange >= targetDis)
         {
-            // 대상의 위치
-            Vector3 targetPosition = col.transform.position;
-
-            // 적(enemy)의 현재 위치에서 대상까지의 방향 벡터
-            Vector3 directionToTarget = targetPosition - enemy.transform.position;
-
-            // 적(enemy)이 현재 바라보는 방향(transform.forward)과 대상까지의 방향 벡터 사이의 각도 계산
-            float angleToTarget = Vector3.Angle(enemy.transform.forward, directionToTarget);
-
-            // 계산된 각도가 attackAngle의 절반(attackAngle / 2)보다 작거나 같으면
-            // (즉, 대상이 적의 attackAngle 시야 범위 안에 있다면)
-            if (angleToTarget <= attackAngle / 2f)
-            {
-                // 추가: 만약 공격 전에 시야 차단 여부를 확인하고 싶다면 Linecast 사용
-                // Linecast가 obstacleLayer에 부딪히지 않았다면 (즉, 시야가 확보된다면)
-                if (!Physics.Linecast(enemy.transform.position, targetPosition, obstacleLayer))
-                {
-                    // 공격 상태로 전환 (EnemyAttackState는 별도로 구현되어 있어야 함)
-                    // 예시: enemy.ChangeState(new EnemyAttackState(enemy)); 
-                    
-                    enemy.ChangeState(new EnemyAttackState(enemy,col));
-                    return; // Update 함수를 즉시 종료하고 다음 프레임에 새로운 상태의 Update 실행
-                }
-            }
+            enemy.ChangeState(new EnemyAttackState(enemy));
         }
-        // === 공격 가능 대상 확인 로직 끝 ===
-        
+    }
+
+    void PredictedChase()
+    {
         foreach (GameObject target in enemy.targets)
         {
             // 타겟과 자신사이의 거리를 구함
@@ -81,49 +66,88 @@ public class EnemyChaseState : EnemyState
             if (distance <= enemy.detectionRadius) //체크거리보다 distance가 작다면(영역내로 들어왔다면)
             {
                 RaycastHit hit;
-                
-                if (!Physics.Raycast(enemy.transform.position, target.transform.position, out hit, enemy.checkRadius, // 나와 플레이어 사이에 장애물이 없다면
-                        obstacleLayer))
+                Vector3 direction = (target.transform.position - enemy.transform.position).normalized;
+                if (!Physics.Raycast(enemy.transform.position, direction, out hit, enemy.detectionRadius, obstacleLayer))
                 {
-                    Debug.DrawRay(enemy.transform.position, target.transform.position * enemy.checkRadius, Color.red);
+                    isDetected = true;
                     enemy.SetTarget(target);
-                    agent.SetDestination(enemy.Target.transform.position);
+                    time = 2f;
+
+                    // 속도 예측 로직
+                    Vector3 currentTargetPosition = target.transform.position; // 타겟의 현재 위치 저장
+                    
+                    // 현재 위치 - 마지막 위치 = 이동량 을 Time.deltaTime 로 나눠 프레임당 변화율
+                    targetVelocity = (currentTargetPosition - lastTargetPosition) / Time.deltaTime; 
+                    
+                    // lastTargetPosition 을 현재 위치로 변경 
+                    lastTargetPosition = currentTargetPosition; 
+
+                    float predictionTime = 0.5f; // 예측 시간 (0.5초 후)
+                    
+                    // 예측 이동값 현재 위치 + 프래임당 변화량 * 예측할 시간
+                    predictedPosition = currentTargetPosition + targetVelocity * predictionTime; 
+
+                    // 타겟의 현재 위치에서 예측위치로 향하는 방향
+                    Vector3 predictedDir = (predictedPosition - currentTargetPosition).normalized;
+                    
+                    float predictedDistance = Vector3.Distance(currentTargetPosition, predictedPosition);
+                    
+                    if (!Physics.Raycast(currentTargetPosition, predictedDir, predictedDistance, obstacleLayer))
+                    {
+                        agent.SetDestination(predictedPosition);
+                        Debug.DrawRay(currentTargetPosition, predictedDir * predictedDistance, Color.magenta);
+                    }
+                    else
+                    {
+                        // 예측 경로에 장애물이 있다면 그냥 현재 위치로 이동
+                        agent.SetDestination(currentTargetPosition);
+                        
+                    }
+                    
                 }
+                else
+                {
+                    isDetected = false;
+                }
+
+                if (!isDetected)
+                {
+                    MissingTarget();
+                }
+                
             }
             else
             {
-                
+                MissingTarget();
             }
+
         }
-        
+    }
 
-        
-        
-
-
-        // === 추적 로직 (공격 가능 대상이 없을 때 실행) ===
-        bool playerDetectedBroadly = false; // 넓은 범위 감지 여부 플래그
-
-        // 넓은 범위에서 플레이어가 시야 확보되지 않았을 경우 (또는 detectedColliders가 비어있을 경우)
-        if (!playerDetectedBroadly)
+    void MissingTarget()
+    {
+        if (enemy.Target)
         {
-            // 마지막으로 감지했던 위치로 이동 (Enter에서 이미 설정됨)
-            agent.SetDestination(detectedPosition);
-            // detectedPosition으로 이동 중이거나 이미 도달한 상태
-            if (agent.remainingDistance <= agent.stoppingDistance)
-            {
-                // 마지막 감지 위치에 도달함
-                time -= Time.deltaTime; // 타이머 감소
-                if (time <= 0f)
-                {
-                    // 일정 시간 이상 플레이어를 다시 감지 못함 -> 추적 포기
-                    Debug.Log("추적 대상 감지 실패 시간 초과. Idle 상태로 전환.");
-                    enemy.ChangeState(new EnemyIdleState(enemy));
-                }
-            }
-            // 만약 detectedPosition으로 가는 도중이라면 계속 그곳으로 이동합니다.
+                        
+            enemy.SetTarget(null);
+            agent.SetDestination(predictedPosition);
         }
-        
+
+        // detectedPosition으로 이동 중이거나 이미 도달한 상태
+        if (agent.remainingDistance <= agent.stoppingDistance)
+        {
+            // 마지막 감지 위치에 도달함
+            time -= Time.deltaTime; // 타이머 감소
+            if (time <= 0f)
+            {
+                // 일정 시간 이상 플레이어를 다시 감지 못함 -> 추적 포기
+                enemy.ChangeState(new EnemyIdleState(enemy));
+            }
+        }
+        else
+        {
+            time = 2f;
+        }
     }
     
 }
