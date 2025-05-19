@@ -24,6 +24,8 @@ public class EnemyIdleState : EnemyState
     {
         DrawDetectionRays();
         ChangeCheckState();
+        
+        
         // 도착지점에 도달했을 때
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
@@ -38,13 +40,23 @@ public class EnemyIdleState : EnemyState
         }
     }
 
-    public void ChangeCheckState()
+    private void ChangeCheckState()
     {
         foreach (GameObject target in targets)
         {
             // 타겟과 자신사이의 거리를 구함
             float distance = Vector3.Distance(target.transform.position, enemy.transform.position);
-
+            
+            
+            if (distance <= enemy.cloakingCheckAmount)// 플레이어가 클로킹 체크 범위 안에 있고 클로킹이 아니라면.
+            {
+                bool targetCloking = target.GetComponent<PlayerController>().isCloaking;
+                if (!targetCloking)
+                {
+                    enemy.SetTarget(target);
+                    enemy.ChangeState(new EnemyCheckState(enemy));
+                }
+            }
             if (distance <= enemy.checkRadius) //체크거리보다 distance가 작다면(영역내로 들어왔다면)
             {
                 // 타겟 방향 구하기
@@ -70,8 +82,6 @@ public class EnemyIdleState : EnemyState
 
                         Vector3 offsetDirection = Quaternion.Euler(0, offsetAngle, 0) * dirToTarget; // 
                         
-                        
-                        
                         RaycastHit hit;
                         
                         if (!Physics.Raycast(enemy.transform.position, offsetDirection, out hit, enemy.checkRadius, layerMask))
@@ -84,6 +94,7 @@ public class EnemyIdleState : EnemyState
             }
         }
     }
+    
     private void DrawDetectionRays()
     {
         int rayCount = 20; // 부채꼴의 세밀함 (숫자가 클수록 촘촘함)

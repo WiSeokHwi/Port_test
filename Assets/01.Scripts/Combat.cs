@@ -15,7 +15,7 @@ public class Combat : MonoBehaviour
     {
         if (currentAttack == null) return; // 공격이 비어있다면 리턴
 
-        Vector3 center = attackPoint.position + transform.rotation * currentAttack.offset; // 공격이 나갈 지점과 방향 설정
+        Vector3 center = transform.position + transform.rotation * currentAttack.offset; // 공격이 나갈 지점과 방향 설정
         
         // 구 콜라이더 생성, (공격중심, 공격 범위, 감지할 레이어)
         Collider[] hitTargets = Physics.OverlapSphere(center, currentAttack.range, currentAttack.targetMask);
@@ -29,7 +29,7 @@ public class Combat : MonoBehaviour
             {
                 if (col.TryGetComponent(out IDamageable target)) // 감지된 콜라이더에 IDamageable이 있다면 그 IDamageable을 target으로 지정
                 {
-                    Debug.Log("데미지 : " + currentAttack.damage + " 공격자 : " + gameObject);
+                    
                     target.TakeDamage(currentAttack.damage, gameObject);// 타겟의 TakeDamage(공격 데이미, 내 게임 오브젝트) 발동
                 }
             }

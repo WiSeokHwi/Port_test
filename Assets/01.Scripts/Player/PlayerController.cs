@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
     public Vector3 LastMoveDirection;
     public Rigidbody rb;
     public Transform cameraTransform;
+    private Health health;
     
     public Weapon CurrentWeapon;
         
@@ -32,10 +33,15 @@ public class PlayerController : MonoBehaviour {
     {
         _animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+        health = GetComponent<Health>();
+        health.OnHealthChanged += OnTakeDamage;
+        health.OnDie += OnDeath;
+        
         ChangeState(new PlayerIdleState());
         
         Equip = Animator.StringToHash("Equip");
         weapone = Instantiate(CurrentWeapon.weaponPrefab, DrawWeaponPoseR.transform);
+        
     }
     
     
@@ -112,6 +118,15 @@ public class PlayerController : MonoBehaviour {
     {
         isAttacking = false;
     }
-    
 
+    // 데미지 받았을때 실행될 메소드 Health.OnHealthChanged 구독
+    void OnTakeDamage(float damage)
+    {
+        ChangeState(new PlayerHitState());
+    }
+
+    void OnDeath()
+    {
+        
+    }
 }

@@ -7,8 +7,6 @@ public class PlayerIdleState : IPlayerState {
 
     public void Enter(PlayerController player) {
         _player = player;
-        
-        
     }
 
     public void HandleInput(PlayerInputCommend input)

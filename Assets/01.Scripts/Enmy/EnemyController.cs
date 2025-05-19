@@ -247,16 +247,16 @@ public class EnemyController : MonoBehaviour
         
         // 현재 NavMeshAgent의 속도(Agent.velocity.magnitude)가 걷기 속도(walkSpeed) 이하라면
         
-        if (targetSpeed  > walkSpeed)
-        {
-            
-            // 걷기 속도(walkSpeed) ~ 뛰기 속도(runSpeed) 사이에서 정규화 후 0.5 추가
-            speedPercent = 0.5f + Mathf.InverseLerp(walkSpeed, runSpeed, currentSpeed) * 0.5f;
-        }
-        else
+        if (walkSpeed >= currentSpeed)
         {
             // 정지 ~ 걷기 속도(walkSpeed) 사이에서 정규화 후 0.5 곱함
             speedPercent = Mathf.InverseLerp(0f, walkSpeed, currentSpeed) * 0.5f;
+            
+        }
+        else
+        {
+            // 걷기 속도(walkSpeed) ~ 뛰기 속도(runSpeed) 사이에서 정규화 후 0.5 추가
+            speedPercent = 0.5f + Mathf.InverseLerp(walkSpeed, runSpeed, currentSpeed) * 0.5f;
         }
         // Animator의 "MoveSpeed" 파라미터 값을 계산된 speedPercent로 설정
         // 0.1f: 값 변경 시 부드럽게 전환되는 시간 (Damp Time)

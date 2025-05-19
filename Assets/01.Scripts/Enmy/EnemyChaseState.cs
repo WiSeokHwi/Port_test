@@ -42,37 +42,41 @@ public class EnemyChaseState : EnemyState
 
     public override void Update()
     {
-        if(enemy.Target) ChangeAttackState();
+       
         PredictedChase();
     }
 
-    void ChangeAttackState()
-    {
-        float targetDis = Vector3.Distance(enemy.transform.position, enemy.Target.transform.position);
-
-        if (attackRange >= targetDis)
-        {
-            enemy.ChangeState(new EnemyAttackState(enemy));
-        }
-    }
+    
 
     void PredictedChase()
     {
         foreach (GameObject target in enemy.targets)
         {
+            
             // 타겟과 자신사이의 거리를 구함
             float distance = Vector3.Distance(target.transform.position, enemy.transform.position);
+            Vector3 direction = (target.transform.position - enemy.transform.position).normalized;
 
+            if (distance <= enemy.attackRange)
+            {
+                float angleToTarget = Vector3.Angle(enemy.transform.forward, direction);
+                
+                if (angleToTarget <= enemy.attackAngle * 0.5f)
+                {
+                    enemy.ChangeState(new EnemyAttackState(enemy));
+                }
+            }
+            
             if (distance <= enemy.detectionRadius) //체크거리보다 distance가 작다면(영역내로 들어왔다면)
             {
                 RaycastHit hit;
-                Vector3 direction = (target.transform.position - enemy.transform.position).normalized;
+                
                 if (!Physics.Raycast(enemy.transform.position, direction, out hit, enemy.detectionRadius, obstacleLayer))
                 {
                     isDetected = true;
                     enemy.SetTarget(target);
                     time = 2f;
-
+                    
                     // 속도 예측 로직
                     Vector3 currentTargetPosition = target.transform.position; // 타겟의 현재 위치 저장
                     

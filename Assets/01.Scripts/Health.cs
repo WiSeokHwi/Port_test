@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class Health : MonoBehaviour, IDamageable
@@ -13,11 +14,11 @@ public class Health : MonoBehaviour, IDamageable
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(float amount, GameObject attacker = null)
+    public void TakeDamage(float amount, [CanBeNull] GameObject attacker = null)
     {
         currentHealth -= amount;
         OnHealthChanged?.Invoke(currentHealth);
-
+        Debug.Log("데미지 : " + amount + " 공격자 : " + attacker);
         if (currentHealth <= 0)
         {
             Die();
