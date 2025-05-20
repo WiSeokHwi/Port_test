@@ -6,10 +6,10 @@ using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
-    private PlayerController _player;
+
     private Animator animator;
     private List<int> currentWeapone;
-    private PlayerInputCommend _input;
+
     private int weaponLayerIndex;
     int attackTriggerHash = Animator.StringToHash("Attack");
     
@@ -19,15 +19,15 @@ public class PlayerAttackState : IPlayerState
     
     private Coroutine layerBlendCoroutine;
     private Transform cameraTransform;
-
     
-    public void Enter(PlayerController player)
+
+    public override void Enter(PlayerController player)
     {
-        _player = player;
-        this.animator = player._animator;
-        currentWeapone = _player.CurrentWeapon.comboData.GetStateHashes();
-        weaponLayerIndex = animator.GetLayerIndex(_player.CurrentWeapon.comboData.animationLayerName);
-        _player.HeadOverray.weight = 0f;
+        base.Enter(player);
+        animator = player._animator;
+        currentWeapone = player.CurrentWeapon.comboData.GetStateHashes();
+        weaponLayerIndex = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
+        player.HeadOverray.weight = 0f;
         animator.applyRootMotion = true;
         cameraTransform = player.cameraTransform;
         
@@ -36,43 +36,34 @@ public class PlayerAttackState : IPlayerState
         
         animator.SetTrigger(attackTriggerHash);
     }
-
-
-    public void HandleInput(PlayerInputCommend input)
-    {
-
-        _input = input;
-        
-    }
-
-    public void Update()
+    public override void Update()
     {
         if (animator.IsInTransition(weaponLayerIndex)) return;
         Quaternion targetRotation = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
-        _player.transform.rotation = Quaternion.Slerp(_player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+        Player.transform.rotation = Quaternion.Slerp(Player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(weaponLayerIndex);
 
         if (currentWeapone.Contains(stateInfo.fullPathHash))
         {
             Debug.Log("콤보 메서드 진입");
             // 마우스 클릭, 애니메이션 재생이 70% 전일때 
-            if (_input.AttackPressed && stateInfo.normalizedTime <= 0.7f)
+            if (PlayerInput.AttackPressed && stateInfo.normalizedTime <= 0.7f)
             {
                 Debug.Log("콤보 진입");
                 Attack();
             }
             else if (stateInfo.normalizedTime >= 0.95f || !currentWeapone.Contains(stateInfo.fullPathHash))
             {
-                _player.ChangeState(new PlayerIdleState());
+                Player.ChangeState(new PlayerIdleState());
             }
         }
-        if (_input.ShiftTap)
+        if (PlayerInput.ShiftTap)
         {
             if (Time.time - lastShiftTapTime < doubleTapThreshold)
             {
                
                 // 구르기 실행
-                _player.ChangeState(new PlayerRollState());
+                Player.ChangeState(new PlayerRollState());
                 lastShiftTapTime = -1f; // 초기화
             }
             else
@@ -81,13 +72,12 @@ public class PlayerAttackState : IPlayerState
             }
         }
     }
-    public void PhysicsUpdate() { }
 
-    public void Exit()
+    public override void Exit()
     {
         //layerBlendCoroutine = player.StartCoroutine(SetLayerWeightSmooth("Upper Mask", 1f));
         animator.applyRootMotion = false;
-        _player.HeadOverray.weight = 1f;
+        Player.HeadOverray.weight = 1f;
         animator.ResetTrigger(attackTriggerHash);
     }
     //private IEnumerator SetLayerWeightSmooth(string layerName, float targetWeight, float duration = 0.1f)

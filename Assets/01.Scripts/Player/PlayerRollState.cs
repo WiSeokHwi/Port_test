@@ -2,21 +2,18 @@ using UnityEngine;
 
 public class PlayerRollState : IPlayerState
 {
-    PlayerInputCommend _input;
-    
-    PlayerController _player;
+
     private Animator animator;
     private int weaponLayerIndex;
     int rollTriggerHash = Animator.StringToHash("Roll");
     private int XMoveAnim;
     private int ZMoveAnim;
 
-    public void Enter(PlayerController player)
+    public override void Enter(PlayerController player)
     {
-        
-        _player = player;
+        base.Enter(player);
         animator = player._animator;
-        weaponLayerIndex = animator.GetLayerIndex(_player.CurrentWeapon.comboData.animationLayerName);
+        weaponLayerIndex = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
         
         XMoveAnim = Animator.StringToHash("XMove");
         ZMoveAnim = Animator.StringToHash("ZMove");
@@ -26,32 +23,23 @@ public class PlayerRollState : IPlayerState
         animator.SetTrigger(rollTriggerHash);
     }
 
-    public void HandleInput(PlayerInputCommend input)
-    {
-        _input = input;
-    }
 
-    public void Update()
+    public override void Update()
     {
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(weaponLayerIndex);
         
-        Quaternion targetRotation = Quaternion.Euler(0, _player.cameraTransform.eulerAngles.y, 0);
-        _player.transform.rotation = Quaternion.Slerp(_player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+        Quaternion targetRotation = Quaternion.Euler(0, Player.cameraTransform.eulerAngles.y, 0);
+        Player.transform.rotation = Quaternion.Slerp(Player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
         
         if (animator.IsInTransition(weaponLayerIndex)) return;
         
         if (stateInfo.normalizedTime >= 0.95f )
         {
-            _player.ChangeState(new PlayerIdleState());
+            Player.ChangeState(new PlayerIdleState());
         }
     }
 
-    public void PhysicsUpdate()
-    {
-        
-    }
-
-    public void Exit()
+    public override void Exit()
     {
         animator.applyRootMotion = false;
     }

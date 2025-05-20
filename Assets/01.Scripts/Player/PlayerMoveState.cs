@@ -1,9 +1,7 @@
 using UnityEngine;
 public class PlayerMoveState : IPlayerState {
     
-    private PlayerController _player;
-    private PlayerInputCommend _input;
-
+    
     private float moveSpeed;
     private float runSpeed;
     private Vector3 movement;
@@ -13,8 +11,8 @@ public class PlayerMoveState : IPlayerState {
     private float animZ; 
     private float animXVelocity;
     private float animZVelocity;
-    private int XMoveAnim;
-    private int ZMoveAnim;
+    private int xMoveAnim;
+    private int zMoveAnim;
     
     private float speedLerp;
     private float speedLerpVelocity;
@@ -22,37 +20,32 @@ public class PlayerMoveState : IPlayerState {
     private float lastShiftTapTime = -1f;
     private float doubleTapThreshold = 0.5f; // 0.3초 이내에 두번 누르면 구르기
     
-    public void Enter(PlayerController player) {
-        
+    public override void Enter(PlayerController player) 
+    {
+        base.Enter(player);
         animator =player._animator;
-        _player = player;
         moveSpeed = player.moveSpeed;
         runSpeed = player.runSpeed;
-        XMoveAnim = Animator.StringToHash("XMove");
-        ZMoveAnim = Animator.StringToHash("ZMove");
-        
-        
-    }
-
-    public void HandleInput(PlayerInputCommend input)
-    {
-        
-        _input = input;
+        xMoveAnim = Animator.StringToHash("XMove");
+        zMoveAnim = Animator.StringToHash("ZMove");
     }
 
 
 
-    public void Update()
+    public override void Update()
     {
-        isRun = _input.RunPressed;
+        isRun = PlayerInput.RunPressed;
         
-        if (_input.ShiftTap)
+        Player.movePosition.x = Move().x;
+        Player.movePosition.z = Move().z;
+        
+        if (PlayerInput.ShiftTap)
         {
             if (Time.time - lastShiftTapTime < doubleTapThreshold)
             {
                 
                 // 구르기 실행
-                _player.ChangeState(new PlayerRollState());
+                Player.ChangeState(new PlayerRollState());
                 lastShiftTapTime = -1f; // 초기화
             }
             else
@@ -60,53 +53,45 @@ public class PlayerMoveState : IPlayerState {
                 lastShiftTapTime = Time.time; // 첫 번째 탭 기록
             }
         }
-        if (_input.JumpPressed && _input.IsGrounded)
+        if (PlayerInput.JumpPressed && Player.controller.isGrounded)
         {
-            animator.SetFloat(XMoveAnim, 0);
-            animator.SetFloat(ZMoveAnim, 0);
+            animator.SetFloat(xMoveAnim, 0);
+            animator.SetFloat(zMoveAnim, 0);
             
-            _player.ChangeState(new PlayerJumpState());
+            Player.ChangeState(new PlayerJumpState());
         }
         
-        if ( _input.MoveInput.magnitude <= 0f && 
-            Mathf.Abs(animX) <= 0.01f &&
-            Mathf.Abs(animZ) <= 0.01f)
+        if ( PlayerInput.MoveInput.magnitude <= 0f && 
+             Mathf.Abs(animX) <= 0.01f &&
+             Mathf.Abs(animZ) <= 0.01f)
         {
             
-            _player.ChangeState(new PlayerIdleState());
+            Player.ChangeState(new PlayerIdleState());
         }
-        if (_input.AttackPressed && _player.equipped)
+        if (PlayerInput.AttackPressed && Player.equipped)
         {
-            animator.SetFloat(XMoveAnim, 0);
-            animator.SetFloat(ZMoveAnim, 0);
-            _player.ChangeState(new PlayerAttackState());
+            animator.SetFloat(xMoveAnim, 0);
+            animator.SetFloat(zMoveAnim, 0);
+            Player.ChangeState(new PlayerAttackState());
         }
 
-        if (_input.EquipPressed)
+        if (PlayerInput.EquipPressed)
         {
-            _player.WeaponEquip();
-            
+            Player.WeaponEquip();
         }
     }
-
-    public void PhysicsUpdate()
+    
+    public Vector3 Move()
     {
-        Move();
-    }
-
-    public void Exit() { }
-
-    public void Move()
-    {
-        float x = _input.MoveInput.x;
-        float z = _input.MoveInput.y;
+        float x = PlayerInput.MoveInput.x;
+        float z = PlayerInput.MoveInput.y;
 
         // 이동 애니메이션 업데이트
         UpdateAnimation(x, z);
 
         // 달리기 / 걷기 상태에 맞는 이동
         Vector3 moveDirection = GetMoveDirection(x, z);
-        MovePlayer(moveDirection);
+        return MovePlayer(moveDirection);
     }
 
     private void UpdateAnimation(float x, float z)
@@ -125,14 +110,14 @@ public class PlayerMoveState : IPlayerState {
         animX = Mathf.SmoothDamp(animX, targetAnimX, ref animXVelocity, smoothTime);
         animZ = Mathf.SmoothDamp(animZ, targetAnimZ, ref animZVelocity, smoothTime);
 
-        animator.SetFloat(XMoveAnim, animX);
-        animator.SetFloat(ZMoveAnim, animZ);
+        animator.SetFloat(xMoveAnim, animX);
+        animator.SetFloat(zMoveAnim, animZ);
     }
 
     private Vector3 GetMoveDirection(float x, float z)
     {
-        Vector3 camForward = _player.cameraTransform.forward;
-        Vector3 camRight = _player.cameraTransform.right;
+        Vector3 camForward = Player.cameraTransform.forward;
+        Vector3 camRight = Player.cameraTransform.right;
         
         // y축 기준으로 방향을 정리하고, 이동 방향 계산
         camForward.y = 0;
@@ -143,16 +128,10 @@ public class PlayerMoveState : IPlayerState {
         return camForward * z + camRight * x;
     }
 
-    private void MovePlayer(Vector3 moveDirection)
+    private Vector3 MovePlayer(Vector3 moveDirection)
     {
         // 이동 처리
         float movementSpeed = moveSpeed * speedLerp;
-        _player.rb.MovePosition(_player.rb.position + moveDirection * (movementSpeed * Time.fixedDeltaTime));
-
-        // 회전 처리
-        Quaternion targetRotation = Quaternion.Euler(0, _player.cameraTransform.eulerAngles.y, 0);
-        _player.transform.rotation = Quaternion.Slerp(_player.transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
-
-        _player.LastMoveDirection = moveDirection;
+        return (moveDirection * movementSpeed);
     }
 }
