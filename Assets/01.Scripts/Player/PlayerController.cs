@@ -124,6 +124,7 @@ public class PlayerController : MonoBehaviour {
         if (isJumping)
         {
             isJumping = false;
+            movePosition = LastMoveDirection;
             return movePosition.y + jumpSpeed;
         }
         else

@@ -17,6 +17,9 @@ public class PlayerJumpState : IPlayerState {
         // 점프 애니메이션 재생
         WeaponLayer = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
         stateInfo = animator.GetCurrentAnimatorStateInfo(WeaponLayer);
+        player.LastMoveDirection = player.movePosition;
+        player.movePosition = Vector3.zero;
+        
         animator.SetTrigger(JumpTrigger);
         
     }
@@ -28,5 +31,4 @@ public class PlayerJumpState : IPlayerState {
             Player.ChangeState(new PlayerFallState());
         }
     }
-
 }

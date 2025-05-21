@@ -5,6 +5,9 @@ public class Health : MonoBehaviour, IDamageable
 {
     [SerializeField] private float maxHealth = 100f;
     private float currentHealth;
+    
+    public float MaxHealth => maxHealth;
+    public float CurrentHealth => currentHealth;
 
     public System.Action OnDie;
     public System.Action<float> OnHealthChanged;
@@ -12,6 +15,7 @@ public class Health : MonoBehaviour, IDamageable
     private void Awake()
     {
         currentHealth = maxHealth;
+        OnHealthChanged?.Invoke(currentHealth);
     }
 
     public void TakeDamage(float amount, [CanBeNull] GameObject attacker = null)

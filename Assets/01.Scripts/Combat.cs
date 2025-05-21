@@ -25,7 +25,10 @@ public class Combat : MonoBehaviour
             // 각도 체크
             Vector3 dirToTarget = (col.transform.position - transform.position).normalized; // 타겟과 나의 방향 구하기
             float angle = Vector3.Angle(transform.forward, dirToTarget); // 내 전방 기준으로 타겟방향의 각도 저장
-            if (angle <= currentAttack.angle * 0.5f) // 타겟 방향이 currentAttack.angle 안에 있다면 ( 양쪽으로 검사하기때문에 90도라면 -45~45 )
+            
+            float distance = Vector3.Distance(col.transform.position, transform.position);
+            
+            if (angle <= currentAttack.angle * 0.5f && distance <= currentAttack.range) // 타겟 방향이 currentAttack.angle 안에 있다면 ( 양쪽으로 검사하기때문에 90도라면 -45~45 )
             {
                 if (col.TryGetComponent(out IDamageable target)) // 감지된 콜라이더에 IDamageable이 있다면 그 IDamageable을 target으로 지정
                 {

@@ -61,13 +61,6 @@ public class PlayerMoveState : IPlayerState {
             Player.ChangeState(new PlayerJumpState());
         }
         
-        if ( PlayerInput.MoveInput.magnitude <= 0f && 
-             Mathf.Abs(animX) <= 0.01f &&
-             Mathf.Abs(animZ) <= 0.01f)
-        {
-            
-            Player.ChangeState(new PlayerIdleState());
-        }
         if (PlayerInput.AttackPressed && Player.equipped)
         {
             animator.SetFloat(xMoveAnim, 0);
@@ -91,6 +84,11 @@ public class PlayerMoveState : IPlayerState {
 
         // 달리기 / 걷기 상태에 맞는 이동
         Vector3 moveDirection = GetMoveDirection(x, z);
+        if (moveDirection.magnitude <= 0.1f)
+        {
+            
+            Player.ChangeState(new PlayerIdleState());
+        }
         return MovePlayer(moveDirection);
     }
 
@@ -99,7 +97,7 @@ public class PlayerMoveState : IPlayerState {
         // 애니메이션 값 설정
         float targetSpeed = isRun ? 1f : 0.5f;
         
-        speedLerp = Mathf.SmoothDamp(speedLerp, targetSpeed, ref speedLerpVelocity, 0.1f);
+        speedLerp = Mathf.SmoothDamp(speedLerp, targetSpeed, ref speedLerpVelocity, 0.05f);
         
         float targetAnimX = speedLerp * x;
         float targetAnimZ = speedLerp * z;
@@ -125,7 +123,7 @@ public class PlayerMoveState : IPlayerState {
         camForward.Normalize();
         camRight.Normalize();
 
-        return camForward * z + camRight * x;
+        return (camForward * z + camRight * x).normalized;
     }
 
     private Vector3 MovePlayer(Vector3 moveDirection)
@@ -133,5 +131,12 @@ public class PlayerMoveState : IPlayerState {
         // 이동 처리
         float movementSpeed = moveSpeed * speedLerp;
         return (moveDirection * movementSpeed);
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        animX = 0f;
+        animZ = 0f;
     }
 }

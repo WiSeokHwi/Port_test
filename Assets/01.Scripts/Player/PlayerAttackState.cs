@@ -28,6 +28,7 @@ public class PlayerAttackState : IPlayerState
         currentWeapone = player.CurrentWeapon.comboData.GetStateHashes();
         weaponLayerIndex = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
         player.HeadOverray.weight = 0f;
+        player.movePosition = Vector3.zero;
         animator.applyRootMotion = true;
         cameraTransform = player.cameraTransform;
         

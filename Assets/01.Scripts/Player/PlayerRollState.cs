@@ -12,6 +12,7 @@ public class PlayerRollState : IPlayerState
     public override void Enter(PlayerController player)
     {
         base.Enter(player);
+        player.movePosition = Vector3.zero;
         animator = player._animator;
         weaponLayerIndex = animator.GetLayerIndex(player.CurrentWeapon.comboData.animationLayerName);
         
