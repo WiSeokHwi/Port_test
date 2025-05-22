@@ -1,11 +1,11 @@
 
+using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 public class PlayerController : MonoBehaviour {
     
     public IPlayerState _currentState { get; private set; }
-    public PlayerInputCommend InputCommend;
     public Animator _animator;
     public Vector3 LastMoveDirection;
     
@@ -69,10 +69,14 @@ public class PlayerController : MonoBehaviour {
     }
     void FixedUpdate()
     {
-        
         _currentState?.PhysicsUpdate();
     }
-    
+
+    private void LateUpdate()
+    {
+        HandleInput();
+    }
+
 
     // ReSharper disable Unity.PerformanceAnalysis
     public void ChangeState(IPlayerState newState) {
