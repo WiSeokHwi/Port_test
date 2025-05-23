@@ -15,7 +15,6 @@ public class Health : MonoBehaviour, IDamageable
     private void Awake()
     {
         currentHealth = maxHealth;
-        OnHealthChanged?.Invoke(currentHealth);
     }
 
     public void TakeDamage(float amount, [CanBeNull] GameObject attacker = null)

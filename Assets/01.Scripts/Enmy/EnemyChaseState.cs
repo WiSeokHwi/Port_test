@@ -63,6 +63,7 @@ public class EnemyChaseState : EnemyState
                 
                 if (angleToTarget <= enemy.attackAngle * 0.5f)
                 {
+                    enemy.SetTarget(target);
                     enemy.ChangeState(new EnemyAttackState(enemy));
                 }
             }

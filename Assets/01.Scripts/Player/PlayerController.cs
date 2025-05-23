@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour {
     
     public float gravity = 9.8f;
     public float moveSpeed = 2f;
-    public float runSpeed = 1f;
+    public float runSpeed = 4f;
     public float jumpSpeed = 2f;
     
     public bool isJumping = false;
@@ -63,18 +63,11 @@ public class PlayerController : MonoBehaviour {
         Debug.Log("현재 상태" + _currentState);
         Debug.Log("땅" + controller.isGrounded);
         
-        // 회전 처리
-        Quaternion targetRotation = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+        
     }
     void FixedUpdate()
     {
         _currentState?.PhysicsUpdate();
-    }
-
-    private void LateUpdate()
-    {
-        HandleInput();
     }
 
 
@@ -128,7 +121,7 @@ public class PlayerController : MonoBehaviour {
         if (isJumping)
         {
             isJumping = false;
-            movePosition = LastMoveDirection;
+            movePosition = LastMoveDirection * jumpSpeed;
             return movePosition.y + jumpSpeed;
         }
         else

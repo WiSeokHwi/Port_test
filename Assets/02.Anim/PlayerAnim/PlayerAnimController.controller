@@ -1063,12 +1063,12 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 1.8832788
+  m_TransitionDuration: 1.8870873
   m_TransitionOffset: 0
-  m_ExitTime: 0.75671345
+  m_ExitTime: 0.019450719
   m_HasExitTime: 0
   m_HasFixedDuration: 1
-  m_InterruptionSource: 2
+  m_InterruptionSource: 1
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
 --- !u!1102 &3445693236670204457
@@ -1337,6 +1337,14 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: XMove
     m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: 6553747614397490569}
+    m_Threshold: 3.5
+    m_Position: {x: 0, y: 0}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: XMove
+    m_Mirror: 0
   m_BlendParameter: XMove
   m_BlendParameterY: ZMove
   m_MinThreshold: -1
@@ -1468,6 +1476,21 @@ AnimatorStateMachine:
   m_ExitPosition: {x: 800, y: 120, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: 3445693236670204457}
+--- !u!206 &6553747614397490569
+BlendTree:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BlendTree
+  m_Childs: []
+  m_BlendParameter: XMove
+  m_BlendParameterY: XMove
+  m_MinThreshold: 0
+  m_MaxThreshold: 1
+  m_UseAutomaticThresholds: 1
+  m_NormalizedBlendValues: 0
+  m_BlendType: 0
 --- !u!1102 &6579262961058762873
 AnimatorState:
   serializedVersion: 6

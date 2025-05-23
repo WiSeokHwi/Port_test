@@ -169,7 +169,7 @@ public partial class @InputSystem_Player: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a34f82db-5668-4cf1-ad37-639f03332b92"",
-                    ""path"": ""<Mouse>/position"",
+                    ""path"": ""<Mouse>/delta"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

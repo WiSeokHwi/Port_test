@@ -1,27 +1,36 @@
 using System;
+using Unity.Cinemachine;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FirstVeiwCamara : MonoBehaviour
 {
+    public PlayerInput playerInputScript; // PlayerInput 컴포넌트를 참조
+    private InputSystem_Player input;   
+    public float mouseSensitivity = 30f;
     
-    public float mouseSensitivity = 100f;
-    public Transform headRig;
     float xRotation = 0f;
     float yRotation = 0f;
     public PlayerController player;
+    private CinemachineCamera thisCamera;
 
-    void Start()
+    private void Awake()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        thisCamera = GetComponent<CinemachineCamera>();
+        player = thisCamera.Target.TrackingTarget.GetComponent<PlayerController>();
+        playerInputScript = player.GetComponent<PlayerInput>();
         
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
     
     void Update()
     {
-        if (player._currentState is PlayerAttackState) return;
+        Vector2 rotInput = playerInputScript.CurrentInput.RotationInput;
+        
         // 마우스 입력
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        float mouseX = rotInput.x * mouseSensitivity * Time.deltaTime;
+        float mouseY = rotInput.y * mouseSensitivity * Time.deltaTime;
 
         // 카메라의 좌우 회전
         yRotation += mouseX;  
@@ -32,9 +41,6 @@ public class FirstVeiwCamara : MonoBehaviour
 
         // 카메라 회전만 처리 (캐릭터는 회전하지 않음)
         transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
-
-        
-
         
     }
 }

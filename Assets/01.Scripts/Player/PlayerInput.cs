@@ -1,12 +1,16 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerInput : MonoBehaviour
 {
     private PlayerController playerController;
-    private InputSystem_Player playerInput;
+    public InputSystem_Player playerInput;
     private Vector2 movement;
     private Vector2 rotation;
+    
+    // 현재 입력을 외부에서 가져갈 수 있게 프로퍼티 제공
+    public PlayerInputCommend CurrentInput { get; private set; }
 
     private void Awake()
     {
@@ -19,23 +23,36 @@ public class PlayerInput : MonoBehaviour
         playerInput.Enable();
     }
 
-    void Start()
+    void OnEnable()
     {
-        playerInput.Player.Move.performed += (context) =>
-        {
-            movement = context.ReadValue<Vector2>();
-        };
-        playerInput.Player.Rotation.performed += (context) =>
-        {
-            Vector2 v = context.ReadValue<Vector2>();
-            rotation = new Vector2(v.y, -v.x);
-        };
-
+        playerInput.Player.Move.performed += OnMove;
+        playerInput.Player.Move.canceled += OnMove;
+        playerInput.Player.Rotation.performed += OnRotate;
+        playerInput.Player.Rotation.canceled += OnRotate;
     }
+
+    void OnDisable()
+    {
+        playerInput.Player.Move.performed -= OnMove;
+        playerInput.Player.Move.canceled -= OnMove;
+        playerInput.Player.Rotation.performed -= OnRotate;
+        playerInput.Player.Rotation.canceled -= OnRotate;
+    }
+
+    void OnMove(InputAction.CallbackContext context)
+    {
+        movement = context.ReadValue<Vector2>();
+    }
+
+    void OnRotate(InputAction.CallbackContext context)
+    {
+        Vector2 v = context.ReadValue<Vector2>();
+        rotation = new Vector2(v.x, v.y);
+    }
+
     void Update()
     {
-
-        PlayerInputCommend input = new PlayerInputCommend(
+        CurrentInput  = new PlayerInputCommend(
             movement,
             rotation,
             Input.GetKeyDown(KeyCode.Space),
@@ -45,7 +62,7 @@ public class PlayerInput : MonoBehaviour
             Input.GetKeyDown(KeyCode.LeftShift)
             
         );
-        playerController.HandleInput(input);
+        playerController.HandleInput(CurrentInput);
     }
     
     

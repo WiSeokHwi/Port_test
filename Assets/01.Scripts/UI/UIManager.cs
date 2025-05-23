@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,7 +27,11 @@ public class UIManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
+    }
 
+    private void Start()
+    {
         if (playerHealth)
         {
             maxHealth = playerHealth.MaxHealth;
@@ -34,6 +39,7 @@ public class UIManager : MonoBehaviour
             SetHealth(playerHealth.CurrentHealth); // 시작 시 체력 표시
         }
     }
+
     public void SetHealth(float current)
     {
         currentHealth = current;
