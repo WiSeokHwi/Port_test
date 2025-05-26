@@ -13,9 +13,6 @@ public class PlayerAttackState : IPlayerState
     private int weaponLayerIndex;
     int attackTriggerHash = Animator.StringToHash("Attack");
     
-    private float lastShiftTapTime = -1f;
-    private float doubleTapThreshold = 0.5f; // 0.3초 이내에 두번 누르면 구르기
-    
     
     private Coroutine layerBlendCoroutine;
     private Transform cameraTransform;
@@ -58,19 +55,10 @@ public class PlayerAttackState : IPlayerState
                 Player.ChangeState(new PlayerIdleState());
             }
         }
-        if (PlayerInput.ShiftTap)
+        if (PlayerInput.rollTriggerPressed)
         {
-            if (Time.time - lastShiftTapTime < doubleTapThreshold)
-            {
-               
-                // 구르기 실행
-                Player.ChangeState(new PlayerRollState());
-                lastShiftTapTime = -1f; // 초기화
-            }
-            else
-            {
-                lastShiftTapTime = Time.time; // 첫 번째 탭 기록
-            }
+            // 구르기 실행
+            Player.ChangeState(new PlayerRollState());
         }
     }
 

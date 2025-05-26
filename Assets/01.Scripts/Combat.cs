@@ -4,10 +4,12 @@ public class Combat : MonoBehaviour
 {
     [SerializeField] private Transform attackPoint; // 판정 기준 위치 (예: 캐릭터 앞)
     private AttackData currentAttack; // 어떤 공격인지 담을 변수
+    public Weapon currentWeapon;
+    
 
     public void SetAttack(AttackData attackData) // 공격을 변경하는 메서드
     {
-        currentAttack = attackData;
+        currentAttack = currentWeapon.attackData;
     }
 
     // 애니메이터 이벤트에서 호출
@@ -33,7 +35,7 @@ public class Combat : MonoBehaviour
                 if (col.TryGetComponent(out IDamageable target)) // 감지된 콜라이더에 IDamageable이 있다면 그 IDamageable을 target으로 지정
                 {
                     
-                    target.TakeDamage(currentAttack.damage, gameObject);// 타겟의 TakeDamage(공격 데이미, 내 게임 오브젝트) 발동
+                    target.TakeDamage(currentWeapon.damage, gameObject);// 타겟의 TakeDamage(공격 데이미, 내 게임 오브젝트) 발동
                 }
             }
         }

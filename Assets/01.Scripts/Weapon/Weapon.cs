@@ -6,4 +6,6 @@ public class Weapon : ScriptableObject
     public string weaponName;
     public GameObject weaponPrefab;
     public WeaponComboData comboData;
+    public float damage;
+    public AttackData attackData;
 }

@@ -13,7 +13,8 @@ public class PlayerController : MonoBehaviour {
     public Transform cameraTransform;
     private Health health;
     
-    public Weapon CurrentWeapon;
+    private Weapon currentWeapon;
+    public Weapon CurrentWeapon => currentWeapon;
     
     
     public float gravity = 9.8f;
@@ -26,6 +27,7 @@ public class PlayerController : MonoBehaviour {
     public bool equipped  = false;
     public bool isCloaking = false;
     private int Equip;
+    private int IsGrounded = Animator.StringToHash("IsGrounded");
 
     public Vector3 movePosition;
 
@@ -41,25 +43,29 @@ public class PlayerController : MonoBehaviour {
     {
         _animator = GetComponent<Animator>();
         controller  = GetComponent<CharacterController>();
+        currentWeapon = GetComponent<Combat>().currentWeapon;
         health = GetComponent<Health>();
         
         health.OnHealthChanged += OnTakeDamage;
         health.OnDie += OnDeath;
+
+        
         
         ChangeState(new PlayerIdleState());
         
         Equip = Animator.StringToHash("Equip");
-        weapone = Instantiate(CurrentWeapon.weaponPrefab, DrawWeaponPoseR.transform);
+        weapone = Instantiate(currentWeapon.weaponPrefab, DrawWeaponPoseR.transform);
         
     }
     
     
     void Update()
     {
-        
+        _animator.SetBool(IsGrounded,controller.isGrounded);
         _currentState?.Update();
         movePosition.y  = GetYVelocity();
         controller.Move(movePosition * Time.deltaTime);
+        
         Debug.Log("현재 상태" + _currentState);
         Debug.Log("땅" + controller.isGrounded);
         
@@ -130,7 +136,7 @@ public class PlayerController : MonoBehaviour {
         };
     }
     
-    public void HandleInput(PlayerInputCommend input)
+    public void HandleInput(PlayerInputCommend input) // 받아온input값을 
     {
         _currentState?.HandleInput(input);
     }

@@ -28,13 +28,18 @@ public class EnemyController : MonoBehaviour
     public GameObject HomePosition => homePosition; // 외부 접근용 프로퍼티
     
     // 순찰 경로 지점들 (필요시 사용)
-    public GameObject[] waypoints; 
+    public GameObject[] waypoints;
+
+    public Transform weaponPos;
+    private GameObject weapon;
     
     // 새로 만든 시각화 관리 스크립트 참조
     [SerializeField] private AttackConeVisualizer attackConeVisualizer;
+    
+    Health health;
 
     public AttackSetting attack; // 공격 시전
-     
+    public Weapon currentWeapon;
 
     // === AI 설정값들 (Inspector에서 조절 가능) ===
     public float detectionRadius = 6f; // 적 감지 반경
@@ -64,15 +69,19 @@ public class EnemyController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>(); // NavMeshAgent 컴포넌트 가져오기
         animator = GetComponent<Animator>(); // Animator 컴포넌트 가져오기
         targets = GameObject.FindGameObjectsWithTag("Player"); // targets 에 Player를 다 담기
+        health = GetComponent<Health>();
         attack = GetComponent<AttackSetting>();
+        currentWeapon = GetComponent<Combat>().currentWeapon;
     }
     
     // 초기 상태 설정 (첫 프레임 업데이트 전 1회 호출)
     void Start()
     {
+        health.OnHealthChanged += OnTakeDamage;
         // 초기 상태를 EnemyIdleState로 설정하고 진입 로직 실행
         currentState = new EnemyIdleState(this); 
         currentState.Enter();
+        weapon = Instantiate(currentWeapon.weaponPrefab , weaponPos, Quaternion.identity );
         // Start 시점에서 시각화 스크립트의 초기 상태 설정 (완전 투명)
         if (attackConeVisualizer != null)
         {
@@ -321,6 +330,11 @@ public class EnemyController : MonoBehaviour
             }
         }
         // === 공격 범위 및 각도 시각화 끝 ===
+    }
+
+    void OnTakeDamage(float damage)
+    {
+        
     }
 
 }

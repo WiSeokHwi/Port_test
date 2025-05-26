@@ -11,9 +11,11 @@ public struct PlayerInputCommend
     
     public bool EquipPressed { get; }
     
-    public bool ShiftTap { get; }
+    public bool rollTriggerPressed { get; }
+    
 
-    public PlayerInputCommend(Vector2 move,Vector2 rotation, bool jump, bool attack, bool run, bool equip, bool shift)
+
+    public PlayerInputCommend(Vector2 move,Vector2 rotation, bool jump, bool attack, bool run, bool equip, bool roll)
     {
         MoveInput = move;
         RotationInput = rotation;
@@ -21,6 +23,6 @@ public struct PlayerInputCommend
         AttackPressed = attack;
         RunPressed = run;
         EquipPressed = equip;
-        ShiftTap = shift;
+        rollTriggerPressed = roll;
     }
 }

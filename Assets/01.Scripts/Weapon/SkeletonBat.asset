@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba6da1deb0d5f844eb58a8d57d555465, type: 3}
+  m_Name: SkeletonBat
+  m_EditorClassIdentifier: 
+  weaponName: bat
+  weaponPrefab: {fileID: 2332572402286731054, guid: 66e75d2e177ad4f4d95df4394e7cadb8, type: 3}
+  comboData: {fileID: 11400000, guid: b48e563c3d5527b499bdecef122edd80, type: 2}
+  damage: 10
+  attackData: {fileID: 11400000, guid: 1b58999a8287f244dae2115e0ab06ca7, type: 2}

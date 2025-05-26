@@ -28,8 +28,12 @@ public class EnemyChaseState : EnemyState
         attackRange = enemy.attackRange;
         attackAngle = enemy.attackAngle;
         isDetected = false; // 감지상태 초기화
+
+        if (enemy.Target != null)
+        {
+            predictedPosition = enemy.Target.transform.position;
+        }
         
-        predictedPosition = enemy.Target.transform.position;
         
         time = 2f; // 마지막 감지 후 추격 유지 시간
 

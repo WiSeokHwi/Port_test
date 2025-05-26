@@ -19,9 +19,6 @@ public class PlayerMoveState : IPlayerState {
 
     private float speedLerp; // 걷기/달리기 보간된 속도값 (0.5~1.0 사이)
 
-    private float lastShiftTapTime = -1f; // 마지막 Shift 입력 시간
-    private float doubleTapThreshold = 0.5f; // 더블탭 인식 시간 간격
-
     // 상태 진입 시 실행 (초기화)
     public override void Enter(PlayerController player) {
         base.Enter(player);
@@ -75,13 +72,9 @@ public class PlayerMoveState : IPlayerState {
     // 상태 전환 처리
     private void HandleStateTransitions() {
         // Shift 더블탭으로 구르기
-        if (PlayerInput.ShiftTap) {
-            if (Time.time - lastShiftTapTime < doubleTapThreshold) {
-                Player.ChangeState(new PlayerRollState());
-                lastShiftTapTime = -1f;
-                return;
-            }
-            lastShiftTapTime = Time.time;
+        if (PlayerInput.rollTriggerPressed) {
+            Player.ChangeState(new PlayerRollState());
+            return;
         }
 
         // 점프 입력 처리 (지면에 있을 때만)

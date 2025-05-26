@@ -15,3 +15,5 @@ MonoBehaviour:
   weaponName: LongSword
   weaponPrefab: {fileID: 3697984261696429270, guid: 2d65dba7e21d3c149b1680e0808eb15c, type: 3}
   comboData: {fileID: 11400000, guid: 18ddb890937b363479cc406690f408fd, type: 2}
+  damage: 10
+  attackData: {fileID: 11400000, guid: aedcc8c8ee717704cb06baacfef720f3, type: 2}
